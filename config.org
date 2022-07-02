@@ -1,0 +1,442 @@
+#+title: Doom emacs Config
+#+PROPERTY: header-args :tangle config.el
+#+options: toc:2
+
+* Table of Contents :toc:
+- [[#doom-default-configuration][Doom Default configuration]]
+- [[#keyboard-shortcuts][Keyboard shortcuts]]
+  - [[#rimuovere-la-scorciatoia-spc-spc][Rimuovere la scorciatoia SPC-SPC]]
+  - [[#toggle-smart-parens-mode-e-lo-disattiva-di-default][Toggle smart parens mode e lo disattiva di default]]
+  - [[#mappa-il-tasto-menu-a-salva][Mappa il tasto menu a salva]]
+  - [[#c-e-vim-shortcut][C-e vim shortcut]]
+  - [[#scambia-vtermtoggle-e-vtermhere][Scambia +vterm/toggle e +vterm/here]]
+- [[#personalizzazione-dellaspetto][Personalizzazione dell'aspetto]]
+  - [[#massimizza-il-frame-allavvio-e-rimuove-i-bordi][Massimizza il frame all'avvio e rimuove i bordi]]
+  - [[#personalizzazione-della-dashboard-allavvio][Personalizzazione della dashboard all'avvio]]
+  - [[#mostra-lindicatore-per-la-batteria-e-ora][Mostra l'indicatore per la batteria e ora]]
+- [[#personalizzazione-di-alcune-impostazioni][Personalizzazione di alcune impostazioni]]
+  - [[#clipboard-like-vim][Clipboard like vim]]
+  - [[#ctrlins-shiftins-always-system-clipboard][Ctrl+ins, Shift+ins always system clipboard]]
+  - [[#add-startpage-search-engine-for-search-online][Add startpage search engine for search online]]
+  - [[#turn-off-ws-butler-mode][Turn off ws-butler-mode]]
+  - [[#template-di-python][Template di python]]
+- [[#apri-la-cartella-del-file-nel-file-browser-externo][Apri la cartella del file nel file browser externo]]
+- [[#lingua][Lingua]]
+  - [[#disabilita-il-completamento-automatico-allavvio][Disabilita il completamento automatico all'avvio]]
+  - [[#front-end-company-box][Front-end company-box]]
+  - [[#funzione-che-permette-di-scambiare-il-dizionario-utilizzato-per-ispell][Funzione che permette di scambiare il dizionario utilizzato per Ispell]]
+  - [[#translation][Translation]]
+  - [[#flyspell][Flyspell]]
+- [[#org][ORG]]
+  - [[#alcune-scorciatoie-utili-per-org-mode][Alcune scorciatoie utili per org mode]]
+  - [[#hooks-per-org-mode][Hooks per org-mode]]
+  - [[#org-tree-slide-mode][Org-tree-slide-mode]]
+  - [[#org-caputre-notes-templates][Org-caputre notes templates]]
+  - [[#org-journal-config][Org-journal config]]
+  - [[#org-roam-config][Org-roam config]]
+  - [[#shortcuts-for-org-roam][Shortcuts for org-roam]]
+
+* Doom Default configuration
+Standard configuration of Doom Emacs
+
+#+begin_src emacs-lisp
+;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
+
+;; Place your private configuration here! Remember, you do not need to run 'doom
+;; sync' after modifying this file!
+
+
+;; Some functionality uses this to identify you, e.g. GPG configuration, email
+;; clients, file templates and snippets.
+(setq user-full-name "R.P."
+      user-mail-address "r.pezzotta1@campus.unimib.it")
+
+;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
+;; are the three important ones:
+;;
+;; + `doom-font'
+;; + `doom-variable-pitch-font'
+;; + `doom-big-font' -- used for `doom-big-font-mode'; use this for
+;;   presentations or streaming.
+;;
+;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
+;; font string. You generally only need these two:
+(setq doom-font (font-spec :family "IBM Plex Mono" :size 17) ;; :weight 'regular)
+      doom-variable-pitch-font (font-spec :family "IBM Plex Sans" :size 19 :weight 'light))
+
+;; There are two ways to load a theme. Both assume the theme is installed and
+;; available. You can either set `doom-theme' or manually load a theme with the
+;; `load-theme' function. This is the default:
+(setq doom-theme 'doom-gruvbox)
+
+;; If you use `org' and don't want your org files in the default location below,
+;; change `org-directory'. It must be set before org loads!
+(setq org-directory "~/Documenti/emacs/org/")
+
+;; This determines the style of line numbers in effect. If set to `nil', line
+;; numbers are disabled. For relative line numbers, set this to `relative'.
+(setq display-line-numbers-type t)
+
+
+;; Here are some additional functions/macros that could help you configure Doom:
+;;
+;; - `load!' for loading external *.el files relative to this one
+;; - `use-package!' for configuring packages
+;; - `after!' for running code after a package has loaded
+;; - `add-load-path!' for adding directories to the `load-path', relative to
+;;   this file. Emacs searches the `load-path' when you load packages with
+;;   `require' or `use-package'.
+;; - `map!' for binding new keys
+;;
+;; To get information about any of these functions/macros, move the cursor over
+;; the highlighted symbol at press 'K' (non-evil users must press 'C-c c k').
+;; This will open documentation for it, including demos of how they are used.
+;;
+;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
+;; they are implemented.
+
+#+end_src
+* Keyboard shortcuts
+** Rimuovere la scorciatoia SPC-SPC
+
+#+begin_src emacs-lisp
+(map! :leader "SPC" nil)
+#+end_src
+
+** Toggle smart parens mode e lo disattiva di default
+
+#+begin_src emacs-lisp
+(map! :leader "t [" #'smartparens-mode)
+(remove-hook 'doom-first-buffer-hook #'smartparens-global-mode)
+#+end_src
+
+** Mappa il tasto menu a salva
+
+#+begin_src emacs-lisp
+(global-set-key (kbd "<menu>") 'save-buffer)
+#+end_src
+
+
+** C-e vim shortcut
+Aggiunge la scorciatoia per copiare quello che è sotto
+
+#+begin_src emacs-lisp
+(define-key evil-insert-state-map (kbd "\C-e") 'evil-copy-from-below)
+#+end_src
+
+** Scambia +vterm/toggle e +vterm/here
+
+#+begin_src emacs-lisp
+(map! :leader :desc "Open vterm popup" "o T" #'+vterm/toggle)
+(map! :leader :desc "Open vterm here" "o t" #'+vterm/here)
+#+end_src
+
+* Personalizzazione dell'aspetto
+** Massimizza il frame all'avvio e rimuove i bordi
+
+#+begin_src emacs-lisp
+(add-to-list 'initial-frame-alist '(fullscreen . maximized))
+(add-to-list 'default-frame-alist '(undecorated . t))
+#+end_src
+
+** Personalizzazione della dashboard all'avvio
+
+#+begin_src emacs-lisp
+(setq fancy-splash-image "~/Pictures/.emacs_mars.png")
+
+(assoc-delete-all "Reload last session" +doom-dashboard-menu-sections)
+(assoc-delete-all "Open org-agenda" +doom-dashboard-menu-sections)
+(assoc-delete-all "Open project" +doom-dashboard-menu-sections)
+(assoc-delete-all "Open documentation" +doom-dashboard-menu-sections)
+
+(remove-hook! '+doom-dashboard-functions #'doom-dashboard-widget-footer)
+
+(add-hook! '+doom-dashboard-functions :append
+  (insert "\n" (+doom-dashboard--center +doom-dashboard--width "I showed you my config files, pls respond")))
+
+#+end_src
+
+** Mostra l'indicatore per la batteria e ora
+
+#+begin_src emacs-lisp
+(add-hook 'after-init-hook #'display-battery-mode)
+(add-hook 'after-init-hook #'display-time)
+(setq display-time-24hr-format t)
+#+end_src
+
+* Personalizzazione di alcune impostazioni
+** Clipboard like vim
+
+#+begin_src emacs-lisp
+(setq select-enable-clipboard nil)
+#+end_src
+
+** Ctrl+ins, Shift+ins always system clipboard
+
+#+begin_src emacs-lisp
+(global-set-key (kbd "S-<insert>") 'clipboard-yank)
+(define-key evil-visual-state-map (kbd "C-<insert>") 'clipboard-kill-region)
+
+(defun robert/yank ()
+  (interactive)
+  (evil-use-register ?+)
+  (call-interactively 'evil-yank))
+(global-set-key (kbd "C-<insert>") 'robert/yank)
+#+end_src
+
+** Add startpage search engine for search online
+
+#+begin_src emacs-lisp
+(add-to-list '+lookup-provider-url-alist '("Startpage" "https://www.startpage.com/sp/search?query=%s"))
+#+end_src
+
+** Turn off ws-butler-mode
+
+#+begin_src emacs-lisp
+(remove-hook 'doom-first-buffer-hook #'ws-butler-global-mode)
+#+end_src
+** Template di python
+
+#+begin_src emacs-lisp
+(set-file-template! "/__\\.py$g" :trigger "__" :mode 'python-mode)
+#+end_src
+
+* Apri la cartella del file nel file browser externo
+
+#+begin_src emacs-lisp
+(defun open-file-externally ()
+  "Open the current file's directory in external file browser."
+  (interactive)
+  (if (equal major-mode 'dired-mode)
+      (consult-file-externally (dired-copy-filename-as-kill))
+      (browse-url (expand-file-name default-directory))))
+
+(map! :leader :desc "Browse or open externally" "o x" #'open-file-externally)
+
+(remove-hook! 'dired-mode-hook #'dired-omit-mode)
+#+end_src
+
+* Lingua
+** Disabilita il completamento automatico all'avvio
+
+#+begin_src emacs-lisp
+(setq company-idle-delay nil)
+#+end_src
+
+** Front-end company-box
+
+#+begin_src emacs-lisp
+(add-hook 'company-mode-hook 'company-box-mode)
+#+end_src
+
+** Funzione che permette di scambiare il dizionario utilizzato per Ispell
+
+#+begin_src emacs-lisp
+(defun fd-switch-dictionary()
+ (interactive)
+ (let* ((dic ispell-current-dictionary)
+        (change (if (string= dic "italian") "english" "italian")))
+  (ispell-change-dictionary change)
+  (message "Dictionary switched from %s to %s" dic change)))
+
+(map! :leader :desc "Switch dictionary" "t d" #'fd-switch-dictionary)
+#+end_src
+
+** Translation
+
+#+begin_src emacs-lisp
+(setq gts-translate-list '(("it" "en")
+                           ("en" "it")
+                           ("it" "es")
+                           ("es" "it")))
+
+(after! go-translate
+(setq gts-default-translator
+      (gts-translator
+       :picker (gts-prompt-picker)
+       :engines (list (gts-bing-engine) (gts-google-engine))
+       :render (gts-buffer-render))))
+#+end_src
+
+** Flyspell
+Rimuove la scorciatoia di default per la correzione automatica e ne aggiunge un'altra con g.
+
+#+begin_src emacs-lisp
+(eval-after-load "flyspell"
+  '(define-key flyspell-mode-map (kbd "C-M-i") nil))
+(global-set-key (kbd "<M-tab>") 'complete-symbol)
+(define-key evil-normal-state-map (kbd "g .") 'flyspell-auto-correct-word)
+#+end_src
+
+* ORG
+** Alcune scorciatoie utili per org mode
+
+#+begin_src emacs-lisp
+(map! :leader :desc "toggle font mode" "t v" #'mixed-pitch-mode)
+(map! :leader :desc "Toggle emphasis markers" "t e" #'+org-pretty-mode)
+(map! :leader :desc "Toggle emphasis headings" "t h" #'org-tree-slide-heading-emphasis-toggle)
+(map! :leader :desc "Toggle centered window" "t C" #'centered-window-mode)
+
+(with-eval-after-load "org"
+  (define-key org-mode-map (kbd "<C-M-return>") #'org-insert-heading))
+#+end_src
+
+** Hooks per org-mode
+
+#+begin_src emacs-lisp
+(add-hook 'org-mode-hook 'mixed-pitch-mode)
+(add-hook 'org-mode-hook '+org-pretty-mode)
+(add-hook 'org-mode-hook '(lambda () (text-scale-increase +1)))
+(add-hook 'org-mode-hook '(lambda () (modify-syntax-entry ?\' " ")))
+#+end_src
+
+** Org-tree-slide-mode
+*** Custom play/stop hooks
+#+begin_src emacs-lisp
+(defun robert/org-tree-slide-play-mode-hook ()
+  ;; (interactive)
+        (+org-pretty-mode)
+        (setq display-line-numbers nil))
+
+(defun robert/org-tree-slide-stop-mode-hook ()
+  ;; (interactive)
+        (+org-pretty-mode)
+        (setq display-line-numbers t))
+
+(add-hook 'org-tree-slide-play-hook 'robert/org-tree-slide-play-mode-hook)
+(add-hook 'org-tree-slide-stop-hook 'robert/org-tree-slide-stop-mode-hook)
+#+end_src
+
+*** Advice remove
+- Allow to start the presentation where the cursor is
+- Remove advice allows to move normally
+- Remove hook of default prettify function
+- Add hook of custom prettify function
+
+#+begin_src emacs-lisp
+(after! org-tree-slide
+  (setq org-tree-slide-cursor-init nil)
+  (advice-remove 'org-tree-slide--display-tree-with-narrow
+                 #'+org-present--hide-first-heading-maybe-a)
+  (remove-hook 'org-tree-slide-mode-hook #'+org-present-prettify-slide-h)
+  (add-hook 'org-tree-slide-mode-hook #'+org-present-prettify-slide-h-custom))
+#+end_src
+
+*** Prettify function without centering
+Copy the configuration of the function, comment out the centering
+portion
+
+#+begin_src emacs-lisp
+(defun +org-present-prettify-slide-h-custom ()
+  "Set up the org window for presentation."
+  (setq +org-present-text-scale 3)
+  (let ((arg (if org-tree-slide-mode +1 -1)))
+    (if (not org-tree-slide-mode)
+        (when +org-present--last-wconf
+          (set-window-configuration +org-present--last-wconf))
+      (setq +org-present--last-wconf (current-window-configuration))
+      (doom/window-maximize-buffer))
+    ;; (when (fboundp 'centered-window-mode)
+    ;;   (setq-local cwm-use-vertical-padding t)
+    ;;   (setq-local cwm-frame-internal-border 100)
+    ;;   (setq-local cwm-left-fringe-ratio -10)
+    ;;   (setq-local cwm-centered-window-width 300)
+    ;;   (centered-window-mode arg))
+    ;; (hide-mode-line-mode arg)
+    (+org-pretty-mode arg)
+    (cond (org-tree-slide-mode
+           (set-window-fringes nil 0 0)
+           (when (bound-and-true-p flyspell-mode)
+             (flyspell-mode -1))
+           (add-hook 'kill-buffer-hook #'+org-present--cleanup-org-tree-slides-mode
+                     nil 'local)
+           (text-scale-set +org-present-text-scale)
+           (ignore-errors (org-latex-preview '(4))))
+          (t
+           (text-scale-set 0)
+           (set-window-fringes nil fringe-mode fringe-mode)
+           (org-clear-latex-preview)
+           (org-remove-inline-images)
+           (org-mode)))
+    (redraw-display)))
+#+end_src
+
+** Org-caputre notes templates
+
+#+begin_src emacs-lisp
+
+(after! org
+  (setq org-capture-templates
+        '(("t" "Todo" plain (file+headline "~/Documenti/emacs/org/capture/task.org" "TODO")
+           "- [ ] %?"
+           :unnarrowed nil)
+          ("j" "Journal" entry (file+datetree "~/Documenti/emacs/org/capture/journal.org")
+           "* %?\nEntered on %U\n  %i\n  %a\n\n"
+           :unnarrowed nil)
+          ("n" "Nota" plain (file "~/Documenti/emacs/org/capture/note.org" )
+           "* %?\n  %i\n  %a\n\n"
+           :unnarrowed nil))))
+
+#+end_src
+
+** Org-journal config
+
+#+begin_src emacs-lisp
+(setq org-journal-date-prefix "#+TITLE: "
+      org-journal-time-prefix "* "
+      org-journal-date-format "%A, %Y_%m_%d"
+      org-journal-file-format "%Y_%m_%d.org")
+
+(map! :leader :desc "Org journal new entry" "J" #'org-journal-new-entry)
+#+end_src
+
+** Org-roam config
+
+#+begin_src emacs-lisp
+(setq org-roam-directory "~/Documenti/emacs/org/roam")
+
+(setq org-roam-capture-templates
+      '(("d" "default"
+         plain "%?"
+         :if-new (file+head "%<%Y_%m_%d_%H%m%s>_${slug}.org" "#+title: ${title}
+#+filetags:
+#+category: ${title}
+#+date: %U\n")
+         :unnarrowed t)))
+
+(setq org-roam-dailies-capture-templates
+      '(("d" "default"
+         entry "* %<%H:%M> %?"
+         :target (file+head "%<%Y_%m_%d>.org" "#+title: %<%Y-%m-%d>\n"))))
+
+;; (setq org-roam-dailies-capture-templates
+;;       '(("d" "default"
+;;          entry "* %<%H:%M> %?"
+;;          :target (file+head "%<%Y_%m_%d>.org" "#+title: %<%Y-%m-%d>\n"))))
+#+end_src
+
+** Shortcuts for org-roam
+
+#+begin_src emacs-lisp
+(defun org-roam-node-insert-immediate (arg &rest args)
+  (interactive "P")
+  (let ((args (cons arg args))
+        (org-roam-capture-templates (list (append (car org-roam-capture-templates)
+                                                  '(:immediate-finish t)))))
+    (apply #'org-roam-node-insert args)))
+
+(map! :leader :desc "Node insert immediate" "n r i" #'org-roam-node-insert-immediate)
+(define-key evil-insert-state-map (kbd "C-M-n") 'org-roam-node-insert-immediate)
+
+(map! :leader :desc "Node insert" "n r I" #'org-roam-node-insert)
+
+;; (defun robert/org-roam-filter-by-tag (tag-name)
+;;   (lambda (node)
+;;     member tag-name (org-roam-node-tags node)))
+
+;; (defun robert/org-roam-list-notes-by-tag (tag-name)
+;;   (mapcar #'org-roam-node-file
+;;           (seq-filter
+;;            (robert/org-roam-filter-by-tag name)
+;;            (org-roam-node-list))))
+#+end_src
