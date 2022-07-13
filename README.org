@@ -24,7 +24,7 @@
 - [[#lingua][Lingua]]
   - [[#disabilita-il-completamento-automatico-allavvio][Disabilita il completamento automatico all'avvio]]
   - [[#front-end-company-box][Front-end company-box]]
-  - [[#funzione-che-permette-di-scambiare-il-dizionario-utilizzato-per-ispell][Funzione che permette di scambiare il dizionario utilizzato per Ispell]]
+  - [[#function-that-switched-between-two-dictionaries][Function that switched between two dictionaries]]
   - [[#translation][Translation]]
   - [[#flyspell][Flyspell]]
 - [[#org][ORG]]
@@ -35,6 +35,7 @@
   - [[#org-journal-config][Org-journal config]]
   - [[#org-roam-config][Org-roam config]]
   - [[#shortcuts-for-org-roam][Shortcuts for org-roam]]
+- [[#popups][Popups]]
 
 * Doom Default configuration
 Standard configuration of Doom Emacs
@@ -96,6 +97,7 @@ Standard configuration of Doom Emacs
 ;; they are implemented.
 
 #+end_src
+
 * Keyboard shortcuts
 ** Rimuovere la scorciatoia SPC-SPC
 
@@ -161,6 +163,7 @@ Aggiunge la scorciatoia per copiare quello che è sotto
 #+begin_src emacs-lisp
 (add-hook 'after-init-hook #'display-battery-mode)
 (add-hook 'after-init-hook #'display-time)
+(add-hook 'after-init-hook #'menu-bar-mode)
 (setq display-time-24hr-format t)
 #+end_src
 
@@ -229,7 +232,7 @@ Aggiunge la scorciatoia per copiare quello che è sotto
 (add-hook 'company-mode-hook 'company-box-mode)
 #+end_src
 
-** Funzione che permette di scambiare il dizionario utilizzato per Ispell
+** Function that switched between two dictionaries
 
 #+begin_src emacs-lisp
 (defun fd-switch-dictionary()
@@ -439,4 +442,18 @@ portion
 ;;           (seq-filter
 ;;            (robert/org-roam-filter-by-tag name)
 ;;            (org-roam-node-list))))
+#+end_src
+
+* Popups
+ By default, the mode-line is hidden in popups. To disable this, you can either:
+
+Change the default :modeline property in +popup-defaults: 
+
+#+begin_src emacs-lisp
+;;(plist-put +popup-defaults :modeline t)
+#+end_src
+
+Completely disable management of the mode-line in popups: 
+#+begin_src emacs-lisp
+(remove-hook '+popup-buffer-mode-hook #'+popup-set-modeline-on-enable-h)
 #+end_src

@@ -82,6 +82,7 @@
 
 (add-hook 'after-init-hook #'display-battery-mode)
 (add-hook 'after-init-hook #'display-time)
+(add-hook 'after-init-hook #'menu-bar-mode)
 (setq display-time-24hr-format t)
 
 (setq select-enable-clipboard nil)
@@ -269,3 +270,7 @@
 ;;           (seq-filter
 ;;            (robert/org-roam-filter-by-tag name)
 ;;            (org-roam-node-list))))
+
+;;(plist-put +popup-defaults :modeline t)
+
+(remove-hook '+popup-buffer-mode-hook #'+popup-set-modeline-on-enable-h)

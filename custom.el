@@ -14,7 +14,19 @@
  '(jdee-db-requested-breakpoint-face-colors (cons "#f0f0f0" "#79740e"))
  '(jdee-db-spec-breakpoint-face-colors (cons "#f0f0f0" "#928374"))
  '(objed-cursor-color "#9d0006")
- '(org-agenda-files '("/home/zeus/Documenti/emacs/org/capture/task.org"))
+ '(org-latex-default-packages-alist
+   '(("AUTO" "inputenc" t
+      ("pdflatex"))
+     ("T1" "fontenc" t
+      ("pdflatex"))
+     ("" "graphicx" t nil)
+     ("" "longtable" nil nil)
+     ("" "wrapfig" nil nil)
+     ("" "rotating" nil nil)
+     ("normalem" "ulem" t nil)
+     ("" "amsmath" t nil)
+     ("" "amssymb" t nil)
+     ("" "capt-of" nil nil)))
  '(pdf-view-midnight-colors (cons "#282828" "#fbf1c7"))
  '(rustic-ansi-faces
    ["#fbf1c7" "#9d0006" "#79740e" "#b57614" "#076678" "#b16286" "#427b58" "#282828"])

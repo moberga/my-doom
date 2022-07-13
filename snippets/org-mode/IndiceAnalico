@@ -6,5 +6,6 @@
 # INDICE ANANLITICO
 #+LATEX_HEADER: \renewcommand{\footnote}{\index}
 #+LATEX_HEADER: \usepackage{imakeidx}
+#+LATEX_HEADER: \usepackage{hyperref}
 #+LATEX_HEADER: \makeindex
 #+LATEX: \AtEndDocument{\newpage \printindex}
