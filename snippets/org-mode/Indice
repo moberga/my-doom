@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: Indice
+# uuid: 
+# key: <indice
+# condition: t
+# --
+
+# INDICE 
+#+LATEX_HEADER: \renewcommand{\footnote}{\index}
+#+LATEX_HEADER: \usepackage{imakeidx}
+#+LATEX_HEADER: \makeindex
+#+LATEX: \AtEndDocument{\newpage \printindex}

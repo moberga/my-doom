@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: Due immagini sulla stessa riga
+# key: <ii
+# --
+
+#+BEGIN_center
+#+ATTR_LATEX: :height 0.25\textheight :center
+$1
+\bigskip
+#+ATTR_LATEX: :height 0.25\textheight :center
+$2
+#+END_center
+
+$0
