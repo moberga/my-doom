@@ -7,7 +7,7 @@
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
 (setq user-full-name "R.P."
-      user-mail-address "r.pezzotta1@campus.unimib.it")
+      user-mail-address "")
 
 ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
 ;; are the three important ones:
@@ -65,6 +65,8 @@
 (map! :leader :desc "Open vterm popup" "o T" #'+vterm/toggle)
 (map! :leader :desc "Open vterm here" "o t" #'+vterm/here)
 
+(setq dired-omit-files "^\\...+$")
+
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
 (add-to-list 'default-frame-alist '(undecorated . t))
 
@@ -83,7 +85,10 @@
 (add-hook 'after-init-hook #'display-battery-mode)
 (add-hook 'after-init-hook #'display-time)
 (add-hook 'after-init-hook #'menu-bar-mode)
-(setq display-time-24hr-format t)
+(setq 
+ display-time-24hr-format t
+ display-time-day-and-date t
+ display-time-default-load-average 3)
 
 (setq select-enable-clipboard nil)
 
@@ -117,6 +122,9 @@
 
 (add-hook 'company-mode-hook 'company-box-mode)
 
+(after! ispell
+  (ispell-change-dictionary "italian"))
+
 (defun fd-switch-dictionary()
  (interactive)
  (let* ((dic ispell-current-dictionary)
@@ -132,11 +140,11 @@
                            ("es" "it")))
 
 (after! go-translate
-(setq gts-default-translator
-      (gts-translator
-       :picker (gts-prompt-picker)
-       :engines (list (gts-bing-engine) (gts-google-engine))
-       :render (gts-buffer-render))))
+  (setq gts-default-translator
+        (gts-translator
+         :picker (gts-prompt-picker)
+         :engines (list (gts-bing-engine) (gts-google-engine))
+         :render (gts-buffer-render))))
 
 (eval-after-load "flyspell"
   '(define-key flyspell-mode-map (kbd "C-M-i") nil))
@@ -150,6 +158,39 @@
 
 (with-eval-after-load "org"
   (define-key org-mode-map (kbd "<C-M-return>") #'org-insert-heading))
+
+ (defun occur-mode-clean-buffer ()
+   "Removes all commentary from the *Occur* buffer, leaving the
+ unadorned lines."
+   (interactive)
+   (if (get-buffer "*Occur*")
+       (save-excursion
+         (set-buffer (get-buffer "*Occur*"))
+         (+evil/window-move-left) 
+         (evil-window-increase-width 28)
+         (+popup-mode)
+         (+word-wrap-mode)
+         (goto-char (point-min))
+         (read-only-mode 0)
+         (if (looking-at "^[0-9]+ lines matching \"")
+             (kill-line 1))
+         (while (re-search-forward "^[ \t]*[0-9]+:"
+                                   (point-max)
+                                   t)
+           (replace-match "")
+           (forward-line 1)))
+     (message "There is no buffer named \"*Occur*\".")))
+
+;; (add-hook 'occur-hook #'occur-mode-clean-buffer)
+
+(defun robert/occur-tree-org ()
+  (interactive)
+  (occur "^\*+ ")
+  (occur-mode-clean-buffer))
+
+(map! :after org
+      :localleader
+      :desc "Show Org tree" ";" #'robert/occur-tree-org)
 
 (add-hook 'org-mode-hook 'mixed-pitch-mode)
 (add-hook 'org-mode-hook '+org-pretty-mode)
@@ -178,7 +219,7 @@
 
 (defun +org-present-prettify-slide-h-custom ()
   "Set up the org window for presentation."
-  (setq +org-present-text-scale 3)
+  (setq +org-present-text-scale 5)
   (let ((arg (if org-tree-slide-mode +1 -1)))
     (if (not org-tree-slide-mode)
         (when +org-present--last-wconf
@@ -244,6 +285,7 @@
          entry "* %<%H:%M> %?"
          :target (file+head "%<%Y_%m_%d>.org" "#+title: %<%Y-%m-%d>\n"))))
 
+;;; IDK
 ;; (setq org-roam-dailies-capture-templates
 ;;       '(("d" "default"
 ;;          entry "* %<%H:%M> %?"

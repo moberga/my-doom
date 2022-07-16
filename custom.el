@@ -27,6 +27,7 @@
      ("" "amsmath" t nil)
      ("" "amssymb" t nil)
      ("" "capt-of" nil nil)))
+ '(org-sidebar-tree-side 'right)
  '(pdf-view-midnight-colors (cons "#282828" "#fbf1c7"))
  '(rustic-ansi-faces
    ["#fbf1c7" "#9d0006" "#79740e" "#b57614" "#076678" "#b16286" "#427b58" "#282828"])
