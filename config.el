@@ -66,6 +66,9 @@
 (map! :leader :desc "Open vterm here" "o t" #'+vterm/here)
 
 (setq dired-omit-files "^\\...+$")
+(eval-after-load 'dired
+  '(evil-define-key 'normal dired-mode-map
+     (kbd ")") 'dired-omit-mode))
 
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
 (add-to-list 'default-frame-alist '(undecorated . t))
@@ -189,6 +192,7 @@
   (occur-mode-clean-buffer))
 
 (map! :after org
+      :map org-mode-map
       :localleader
       :desc "Show Org tree" ";" #'robert/occur-tree-org)
 

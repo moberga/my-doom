@@ -30,7 +30,7 @@
   - [[#flyspell][Flyspell]]
 - [[#org][ORG]]
   - [[#some-useful-shortcuts][Some useful shortcuts]]
-  - [[#occur-buffer-for-tree-view-of-org-mode-headers][*Occur* Buffer for tree view of org mode headers]]
+  - [[#occur-buffer-for-tree-view-of-org-mode-headers][Occur Buffer for tree view of org mode headers]]
   - [[#hooks-org-mode][Hooks org-mode]]
   - [[#org-tree-slide-mode][Org-tree-slide-mode]]
   - [[#org-caputre-notes-templates][Org-caputre notes templates]]
@@ -139,10 +139,14 @@ Aggiunge la scorciatoia per copiare quello che è sotto
 
 ** Dired hide hidden files
 
-From [[https://qerub.se/hiding-hidden-files-in-emacs-dired][here]].
+From [[https://qerub.se/hiding-hidden-files-in-emacs-dired][here]] and [[https://stackoverflow.com/questions/31363541/how-to-map-emacs-evil-keys-to-dired-plus][here]].
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results none
 (setq dired-omit-files "^\\...+$")
+
+(eval-after-load 'dired
+  '(evil-define-key 'normal dired-mode-map
+     (kbd ")") 'dired-omit-mode))
 #+end_src
 
 ** Maximize frame and remove decorations
@@ -308,7 +312,7 @@ Rimuove la scorciatoia di default per la correzione automatica e ne aggiunge un'
   (define-key org-mode-map (kbd "<C-M-return>") #'org-insert-heading))
 #+end_src
 
-** *Occur* Buffer for tree view of org mode headers
+** Occur Buffer for tree view of org mode headers
 
 From the [[https://www.emacswiki.org/emacs/OccurMode#h5o-7][Emacs Wiki]]
 
@@ -350,6 +354,7 @@ Then use =doom/window-maximize-buffer= to hide the sidebar.
   (occur-mode-clean-buffer))
 
 (map! :after org
+      :map org-mode-map
       :localleader
       :desc "Show Org tree" ";" #'robert/occur-tree-org)
 #+end_src
