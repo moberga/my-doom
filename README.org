@@ -10,6 +10,7 @@
   - [[#map-menu-key-to-save][Map menu key to save]]
   - [[#c-e-vim-shortcut][C-e vim shortcut]]
   - [[#switch-vtermtoggle-and-vtermhere][Switch +vterm/toggle and +vterm/here]]
+  - [[#q-to-execute-line-in-shell][Q to execute line in shell]]
 - [[#customize-look][Customize look]]
   - [[#dired-hide-hidden-files][Dired hide hidden files]]
   - [[#maximize-frame-and-remove-decorations][Maximize frame and remove decorations]]
@@ -135,6 +136,38 @@ Aggiunge la scorciatoia per copiare quello che è sotto
 (map! :leader :desc "Open vterm here" "o t" #'+vterm/here)
 #+end_src
 
+** Q to execute line in shell
+
+From [[https://emacs.stackexchange.com/questions/55506/run-current-line-or-selection-in-shell-then-insert-result-in-emacs-buffer-acme][here]].
+This function exectutes the line in shell and puts the output under the line
+with the command. Repeating the command updates the output.
+
+#+begin_src emacs-lisp :results none
+(defun robert/execute-in-shell-and-put-in-buffer (b e)
+  "Run current line as shell code and insert/update output."
+  (interactive (list (line-beginning-position)
+                     (line-end-position)))
+  (save-excursion
+    ;; delete old output
+    (delete-region
+     (progn (forward-line) (point))
+     (progn (while (get-text-property (point) '$$)
+              (forward-line))
+            (point)))
+
+    (unless (bolp) (insert "\n"))
+    (let* ((command (buffer-substring-no-properties b e))
+           (output (with-temp-buffer
+                     (shell-command command t t)
+                     (buffer-string)))
+           (start (point)))
+      (insert (propertize output '$$ t 'rear-nonsticky t))
+      (pulse-momentary-highlight-region start (point)))))
+
+(define-key evil-normal-state-map (kbd "Q") 'robert/execute-in-shell-and-put-in-buffer)
+#+end_src
+
+
 * Customize look
 
 ** Dired hide hidden files
@@ -204,6 +237,7 @@ From [[https://discourse.doomemacs.org/t/how-to-change-your-splash-screen/57][di
 (define-key evil-visual-state-map (kbd "C-<insert>") 'clipboard-kill-region)
 
 (defun robert/yank ()
+  "Yank to system clipboard"
   (interactive)
   (evil-use-register ?+)
   (call-interactively 'evil-yank))
@@ -349,6 +383,7 @@ Then use =doom/window-maximize-buffer= to hide the sidebar.
 
 #+begin_src emacs-lisp
 (defun robert/occur-tree-org ()
+  "Show headings of org file"
   (interactive)
   (occur "^\*+ ")
   (occur-mode-clean-buffer))

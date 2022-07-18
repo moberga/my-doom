@@ -65,7 +65,31 @@
 (map! :leader :desc "Open vterm popup" "o T" #'+vterm/toggle)
 (map! :leader :desc "Open vterm here" "o t" #'+vterm/here)
 
+(defun robert/execute-in-shell-and-put-in-buffer (b e)
+  "Run current line as shell code and insert/update output."
+  (interactive (list (line-beginning-position)
+                     (line-end-position)))
+  (save-excursion
+    ;; delete old output
+    (delete-region
+     (progn (forward-line) (point))
+     (progn (while (get-text-property (point) '$$)
+              (forward-line))
+            (point)))
+
+    (unless (bolp) (insert "\n"))
+    (let* ((command (buffer-substring-no-properties b e))
+           (output (with-temp-buffer
+                     (shell-command command t t)
+                     (buffer-string)))
+           (start (point)))
+      (insert (propertize output '$$ t 'rear-nonsticky t))
+      (pulse-momentary-highlight-region start (point)))))
+
+(define-key evil-normal-state-map (kbd "Q") 'robert/execute-in-shell-and-put-in-buffer)
+
 (setq dired-omit-files "^\\...+$")
+
 (eval-after-load 'dired
   '(evil-define-key 'normal dired-mode-map
      (kbd ")") 'dired-omit-mode))
@@ -99,6 +123,7 @@
 (define-key evil-visual-state-map (kbd "C-<insert>") 'clipboard-kill-region)
 
 (defun robert/yank ()
+  "Yank to system clipboard"
   (interactive)
   (evil-use-register ?+)
   (call-interactively 'evil-yank))
@@ -187,6 +212,7 @@
 ;; (add-hook 'occur-hook #'occur-mode-clean-buffer)
 
 (defun robert/occur-tree-org ()
+  "Show headings of org file"
   (interactive)
   (occur "^\*+ ")
   (occur-mode-clean-buffer))
