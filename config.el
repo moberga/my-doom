@@ -88,6 +88,46 @@
 
 (define-key evil-normal-state-map (kbd "Q") 'robert/execute-in-shell-and-put-in-buffer)
 
+(defun robert/kill-current-buffer ()
+  (interactive)
+  (catch 'quit
+    (save-window-excursion
+      (let (done)
+        (when (and buffer-file-name (buffer-modified-p))
+          (while (not done)
+            (let ((response (read-char-choice
+                             (format "Save file %s? (y, n, d, q) " (buffer-file-name))
+                             '(?y ?n ?d ?q))))
+              (setq done (cond
+                          ((eq response ?q) (throw 'quit nil))
+                          ((eq response ?y) (save-buffer) t)
+                          ((eq response ?n) (set-buffer-modified-p nil) t)
+                          ((eq response ?d) (diff-buffer-with-file) nil))))))
+        (kill-buffer (current-buffer))))))
+(map! :leader :desc "Kill buffer" "b k" #'robert/kill-current-buffer)
+(map! :leader :desc "Kill buffer" "b d" #'robert/kill-current-buffer)
+
+
+;; This works only when `kill-buffer' is called, does nothing in ibuffer idk
+(defun robert/kill-buffer (orig-func &optional buffer-or-name)
+  (catch 'quit
+    (save-window-excursion
+      (with-current-buffer buffer-or-name
+        (let (done (buf (current-buffer)))
+          (when (and buffer-file-name (buffer-modified-p))
+            (while (not done)
+              (let ((response (read-char-choice
+                               (format "Save file %s? (y, n, d, q) " (buffer-file-name buf))
+                               '(?y ?n ?d ?q))))
+                (setq done (cond
+                            ((eq response ?q) (throw 'quit nil))
+                            ((eq response ?y) (save-buffer) t)
+                            ((eq response ?n) (set-buffer-modified-p nil) t)
+                            ((eq response ?d) (diff-buffer-with-file) nil))))))
+          (apply orig-func (list (current-buffer))))))))
+
+(advice-add 'kill-buffer :around #'robert/kill-buffer)
+
 (setq dired-omit-files "^\\...+$")
 
 (eval-after-load 'dired
@@ -111,23 +151,25 @@
 
 (add-hook 'after-init-hook #'display-battery-mode)
 (add-hook 'after-init-hook #'display-time)
-(add-hook 'after-init-hook #'menu-bar-mode)
+;; (add-hook 'after-init-hook #'menu-bar-mode)
 (setq 
- display-time-24hr-format t
- display-time-day-and-date t
+ display-time-format "%a·%d/%m/%y·%H:%M"
+ ;; display-time-24hr-format t
+ ;; display-time-day-and-date t
  display-time-default-load-average 3)
 
 (setq select-enable-clipboard nil)
 
 (global-set-key (kbd "S-<insert>") 'clipboard-yank)
-(define-key evil-visual-state-map (kbd "C-<insert>") 'clipboard-kill-region)
+(define-key evil-visual-state-map (kbd "C-<insert>") 'robert/copy)
+(define-key evil-visual-state-map (kbd "S-<deltechar>") 'clipboard-kill-region)
 
-(defun robert/yank ()
-  "Yank to system clipboard"
+(defun robert/copy ()
+  "Copy to system clipboard"
   (interactive)
   (evil-use-register ?+)
   (call-interactively 'evil-yank))
-(global-set-key (kbd "C-<insert>") 'robert/yank)
+(global-set-key (kbd "C-<insert>") 'robert/copy)
 
 (add-to-list '+lookup-provider-url-alist '("Startpage" "https://www.startpage.com/sp/search?query=%s"))
 
@@ -144,7 +186,7 @@
 
 (map! :leader :desc "Browse or open externally" "o x" #'open-file-externally)
 
-(remove-hook! 'dired-mode-hook #'dired-omit-mode)
+;; (remove-hook! 'dired-mode-hook #'dired-omit-mode)
 
 (setq company-idle-delay nil)
 
@@ -198,6 +240,7 @@
          (evil-window-increase-width 28)
          (+popup-mode)
          (+word-wrap-mode)
+         (text-scale-adjust -1)
          (goto-char (point-min))
          (read-only-mode 0)
          (if (looking-at "^[0-9]+ lines matching \"")
