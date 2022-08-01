@@ -9,8 +9,10 @@
   - [[#toggle-smart-parens-mode-and-disable-on-startup][Toggle smart parens mode and disable on startup]]
   - [[#map-menu-key-to-save][Map menu key to save]]
   - [[#c-e-vim-shortcut][C-e vim shortcut]]
+  - [[#evil-search-wrap][Evil-search wrap]]
   - [[#switch-vtermtoggle-and-vtermhere][Switch +vterm/toggle and +vterm/here]]
   - [[#q-to-execute-line-in-shell][Q to execute line in shell]]
+  - [[#grep][Grep]]
 - [[#customize-look][Customize look]]
   - [[#show-diff-before-close-file][Show diff before close file]]
   - [[#dired-hide-hidden-files][Dired hide hidden files]]
@@ -130,6 +132,13 @@ Aggiunge la scorciatoia per copiare quello che è sotto
 (define-key evil-insert-state-map (kbd "\C-e") 'evil-copy-from-below)
 #+end_src
 
+** Evil-search wrap
+When executing macros they stop at the end of the file.
+
+#+begin_src emacs-lisp
+(setq evil-search-wrap 'nil)
+#+end_src
+
 ** Switch +vterm/toggle and +vterm/here
 
 #+begin_src emacs-lisp
@@ -168,6 +177,11 @@ with the command. Repeating the command updates the output.
 (define-key evil-normal-state-map (kbd "Q") 'robert/execute-in-shell-and-put-in-buffer)
 #+end_src
 
+** Grep
+
+#+begin_src emacs-lisp
+(map! :leader :desc "Grep" "/" #'grep)
+#+end_src
 
 * Customize look
 ** Show diff before close file
@@ -195,24 +209,26 @@ From [[https://emacs.stackexchange.com/questions/3245/kill-buffer-prompt-with-op
 
 
 ;; This works only when `kill-buffer' is called, does nothing in ibuffer idk
-(defun robert/kill-buffer (orig-func &optional buffer-or-name)
-  (catch 'quit
-    (save-window-excursion
-      (with-current-buffer buffer-or-name
-        (let (done (buf (current-buffer)))
-          (when (and buffer-file-name (buffer-modified-p))
-            (while (not done)
-              (let ((response (read-char-choice
-                               (format "Save file %s? (y, n, d, q) " (buffer-file-name buf))
-                               '(?y ?n ?d ?q))))
-                (setq done (cond
-                            ((eq response ?q) (throw 'quit nil))
-                            ((eq response ?y) (save-buffer) t)
-                            ((eq response ?n) (set-buffer-modified-p nil) t)
-                            ((eq response ?d) (diff-buffer-with-file) nil))))))
-          (apply orig-func (list (current-buffer))))))))
+;; Removed because gives error "error in process sentinel selecting deleted buffer"
+;; when calling `org-agenda-file-to-front' 
+;; (defun robert/kill-buffer (orig-func &optional buffer-or-name)
+;;   (catch 'quit
+;;     (save-window-excursion
+;;       (with-current-buffer buffer-or-name
+;;         (let (done (buf (current-buffer)))
+;;           (when (and buffer-file-name (buffer-modified-p))
+;;             (while (not done)
+;;               (let ((response (read-char-choice
+;;                                (format "Save file %s? (y, n, d, q) " (buffer-file-name buf))
+;;                                '(?y ?n ?d ?q))))
+;;                 (setq done (cond
+;;                             ((eq response ?q) (throw 'quit nil))
+;;                             ((eq response ?y) (save-buffer) t)
+;;                             ((eq response ?n) (set-buffer-modified-p nil) t)
+;;                             ((eq response ?d) (diff-buffer-with-file) nil))))))
+;;           (apply orig-func (list (current-buffer))))))))
 
-(advice-add 'kill-buffer :around #'robert/kill-buffer)
+;; (advice-add 'kill-buffer :around #'robert/kill-buffer)
 #+end_src
 
 ** Dired hide hidden files
@@ -239,6 +255,30 @@ From [[https://emacs.stackexchange.com/questions/2999/how-to-maximize-my-emacs-f
 ** Customize splash screen
 
 From [[https://discourse.doomemacs.org/t/how-to-change-your-splash-screen/57][discourse]].
+
+This is the ascii splash image.
+
+#+begin_src emacs-lisp
+;; (defun my-weebery-is-always-greater ()
+;; (let* ((banner '("───▄▄─▄████▄▐▄▄▄▌"
+;;                  "──▐──████▀███▄█▄▌"
+;;                  "▐─▌──█▀▌──▐▀▌▀█▀ "
+;;                  "─▀───▌─▌──▐─▌    "
+;;                  "─────█─█──▐▌█    "))
+;;          (longest-line (apply #'max (mapcar #'length banner))))
+;;     (put-text-property
+;;      (point)
+;;      (dolist (line banner (point))
+;;        (insert (+doom-dashboard--center
+;;                 +doom-dashboard--width
+;;                 (concat line (make-string (max 0 (- longest-line (length line))) 32)))
+;;                "\n"))
+;;      'face 'doom-dashboard-banner)))
+
+;; (setq +doom-dashboard-ascii-banner-fn #'my-weebery-is-always-greater)
+#+end_src
+
+This is the image splash image for the GUI.
 
 #+begin_src emacs-lisp
 (setq fancy-splash-image "~/Pictures/.emacs_mars.png")
@@ -442,7 +482,6 @@ Then use =doom/window-maximize-buffer= to hide the sidebar.
       :desc "Show Org tree" ";" #'robert/occur-tree-org)
 #+end_src
 
-
 ** Hooks org-mode
 
 #+begin_src emacs-lisp
@@ -559,7 +598,7 @@ portion
 (setq org-roam-capture-templates
       '(("d" "default"
          plain "%?"
-         :if-new (file+head "%<%Y_%m_%d_%H%m%s>_${slug}.org" "#+title: ${title}
+         :if-new (file+head "${slug}_%<%Y_%m_%d_%H%m%s>.org" "#+title: ${title}
 ,#+filetags:
 ,#+category: ${title}
 ,#+date: %U\n")

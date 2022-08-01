@@ -3,21 +3,12 @@
 # key: <testata
 # --
 
+:Org_properties:
 #+EXPORT_FILE_NAME: ${1:Nome_file}.pdf
+
 #+LANGUAGE: it
 
 # #+BIBLIOGRAPHY: ~/Documenti/.Libreria_personale.bib
-
-# LATEX OPTIONS
-#+LATEX_COMPILER: xelatex
-#+LATEX_CLASS_OPTIONS: [11pt]
-#+LATEX_HEADER: \usepackage[a4paper, margin=2cm]{geometry}
-#+LATEX_HEADER: \usepackage{fancyhdr}
-#+LATEX_HEADER: \pagestyle{fancy}
-#+LATEX_HEADER: \lhead{\bfseries ${2:Intestazione_sinistra}}
-#+LATEX_HEADER: \rhead{\bfseries ${3:Intestazione_destra}}
-#+LATEX_HEADER: \usepackage[italian]{babel}
-# #+LATEX_HEADER: \usepackage{isotope}
 
 # ORG OPTIONS
 #+OPTIONS: author:nil
@@ -25,7 +16,29 @@
 #+OPTIONS: toc:2
 #+OPTIONS: num:2
 #+OPTIONS: H:9
+:end:
+:Latex_properties:
+# LATEX OPTIONS
+#+LATEX_COMPILER: xelatex
+#+LATEX_CLASS_OPTIONS: [11pt]
+#+LATEX_HEADER: \usepackage[a4paper, margin=2cm]{geometry}
+#+LATEX_HEADER: \usepackage{fancyhdr}
+#+LATEX_HEADER: \setlength{\headheight}{13.59999pt}
+#+LATEX_HEADER: \addtolength{\topmargin}{-1.59999pt}
+#+LATEX_HEADER: \pagestyle{fancy}
+#+LATEX_HEADER: \lhead{\bfseries ${2:Intestazione_sinistra}}
+#+LATEX_HEADER: \rhead{\bfseries ${3:Intestazione_destra}}
+#+LATEX_HEADER: \usepackage[italian]{babel}
+# #+LATEX_HEADER: \usepackage{isotope}
+
+# INDICE ANANLITICO
+#+LATEX_HEADER: \renewcommand{\footnote}{\index}
+#+LATEX_HEADER: \usepackage{imakeidx}
+#+LATEX_HEADER: \usepackage{hyperref}
+#+LATEX_HEADER: \makeindex
+#+LATEX: \AtEndDocument{\newpage \printindex}
 
 #+LATEX:\newpage
+:end:
 
 $0

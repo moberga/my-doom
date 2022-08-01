@@ -62,6 +62,8 @@
 
 (define-key evil-insert-state-map (kbd "\C-e") 'evil-copy-from-below)
 
+(setq evil-search-wrap 'nil)
+
 (map! :leader :desc "Open vterm popup" "o T" #'+vterm/toggle)
 (map! :leader :desc "Open vterm here" "o t" #'+vterm/here)
 
@@ -88,6 +90,8 @@
 
 (define-key evil-normal-state-map (kbd "Q") 'robert/execute-in-shell-and-put-in-buffer)
 
+(map! :leader :desc "Grep" "/" #'grep)
+
 (defun robert/kill-current-buffer ()
   (interactive)
   (catch 'quit
@@ -109,24 +113,26 @@
 
 
 ;; This works only when `kill-buffer' is called, does nothing in ibuffer idk
-(defun robert/kill-buffer (orig-func &optional buffer-or-name)
-  (catch 'quit
-    (save-window-excursion
-      (with-current-buffer buffer-or-name
-        (let (done (buf (current-buffer)))
-          (when (and buffer-file-name (buffer-modified-p))
-            (while (not done)
-              (let ((response (read-char-choice
-                               (format "Save file %s? (y, n, d, q) " (buffer-file-name buf))
-                               '(?y ?n ?d ?q))))
-                (setq done (cond
-                            ((eq response ?q) (throw 'quit nil))
-                            ((eq response ?y) (save-buffer) t)
-                            ((eq response ?n) (set-buffer-modified-p nil) t)
-                            ((eq response ?d) (diff-buffer-with-file) nil))))))
-          (apply orig-func (list (current-buffer))))))))
+;; Removed because gives error "error in process sentinel selecting deleted buffer"
+;; when calling `org-agenda-file-to-front' 
+;; (defun robert/kill-buffer (orig-func &optional buffer-or-name)
+;;   (catch 'quit
+;;     (save-window-excursion
+;;       (with-current-buffer buffer-or-name
+;;         (let (done (buf (current-buffer)))
+;;           (when (and buffer-file-name (buffer-modified-p))
+;;             (while (not done)
+;;               (let ((response (read-char-choice
+;;                                (format "Save file %s? (y, n, d, q) " (buffer-file-name buf))
+;;                                '(?y ?n ?d ?q))))
+;;                 (setq done (cond
+;;                             ((eq response ?q) (throw 'quit nil))
+;;                             ((eq response ?y) (save-buffer) t)
+;;                             ((eq response ?n) (set-buffer-modified-p nil) t)
+;;                             ((eq response ?d) (diff-buffer-with-file) nil))))))
+;;           (apply orig-func (list (current-buffer))))))))
 
-(advice-add 'kill-buffer :around #'robert/kill-buffer)
+;; (advice-add 'kill-buffer :around #'robert/kill-buffer)
 
 (setq dired-omit-files "^\\...+$")
 
@@ -136,6 +142,24 @@
 
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
 (add-to-list 'default-frame-alist '(undecorated . t))
+
+;; (defun my-weebery-is-always-greater ()
+;; (let* ((banner '("───▄▄─▄████▄▐▄▄▄▌"
+;;                  "──▐──████▀███▄█▄▌"
+;;                  "▐─▌──█▀▌──▐▀▌▀█▀ "
+;;                  "─▀───▌─▌──▐─▌    "
+;;                  "─────█─█──▐▌█    "))
+;;          (longest-line (apply #'max (mapcar #'length banner))))
+;;     (put-text-property
+;;      (point)
+;;      (dolist (line banner (point))
+;;        (insert (+doom-dashboard--center
+;;                 +doom-dashboard--width
+;;                 (concat line (make-string (max 0 (- longest-line (length line))) 32)))
+;;                "\n"))
+;;      'face 'doom-dashboard-banner)))
+
+;; (setq +doom-dashboard-ascii-banner-fn #'my-weebery-is-always-greater)
 
 (setq fancy-splash-image "~/Pictures/.emacs_mars.png")
 
@@ -347,7 +371,7 @@
 (setq org-roam-capture-templates
       '(("d" "default"
          plain "%?"
-         :if-new (file+head "%<%Y_%m_%d_%H%m%s>_${slug}.org" "#+title: ${title}
+         :if-new (file+head "${slug}_%<%Y_%m_%d_%H%m%s>.org" "#+title: ${title}
 #+filetags:
 #+category: ${title}
 #+date: %U\n")
