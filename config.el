@@ -145,7 +145,16 @@
 
 ;; (remove-hook! 'dired-mode-hook #'dired-omit-mode)
 
+(defun robert/dired-popup-this-location ()
+  "Open popup dired buffer of current file"
+  (interactive)
+  (dired-other-window default-directory))
+
+(map! :leader :desc "Explore this dir" "x" #'robert/dired-popup-this-location)
+
 (map! :leader "SPC" nil)
+
+(map! :leader "X" nil)
 
 (map! :leader "t [" #'smartparens-mode)
 (remove-hook 'doom-first-buffer-hook #'smartparens-global-mode)
@@ -372,7 +381,7 @@
       org-journal-date-format "%A, %Y_%m_%d"
       org-journal-file-format "%Y_%m_%d.org")
 
-(map! :leader :desc "Org journal new entry" "J" #'org-journal-new-entry)
+(map! :leader :desc "Org-J new entry" "J" #'org-journal-new-entry)
 
 (setq org-roam-directory "~/Documenti/emacs/org/roam")
 

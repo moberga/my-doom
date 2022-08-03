@@ -223,11 +223,30 @@ From [[https://emacs.stackexchange.com/questions/3245/kill-buffer-prompt-with-op
 ;; (remove-hook! 'dired-mode-hook #'dired-omit-mode)
 #+end_src
 
+*** Dired split
+
+Dired split window corresponding to current file directory.
+
+#+begin_src emacs-lisp
+(defun robert/dired-popup-this-location ()
+  "Open popup dired buffer of current file"
+  (interactive)
+  (dired-other-window default-directory))
+
+(map! :leader :desc "Explore this dir" "x" #'robert/dired-popup-this-location)
+#+end_src
+
 ** Keyboard 
 *** Remove SPC-SPC shortcut
 
 #+begin_src emacs-lisp
 (map! :leader "SPC" nil)
+#+end_src
+
+*** Remove SPC-X shortcut
+
+#+begin_src emacs-lisp
+(map! :leader "X" nil)
 #+end_src
 
 *** Toggle smart parens mode and disable on startup
@@ -607,7 +626,7 @@ portion
       org-journal-date-format "%A, %Y_%m_%d"
       org-journal-file-format "%Y_%m_%d.org")
 
-(map! :leader :desc "Org journal new entry" "J" #'org-journal-new-entry)
+(map! :leader :desc "Org-J new entry" "J" #'org-journal-new-entry)
 #+end_src
 
 *** Org-roam
