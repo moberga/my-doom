@@ -19,7 +19,7 @@
 ;;
 ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
 ;; font string. You generally only need these two:
-(setq doom-font (font-spec :family "IBM Plex Mono" :size 17) ;; :weight 'regular)
+(setq doom-font (font-spec :family "BlexMono Nerd Font" :size 17) ;; :weight 'regular)
       doom-variable-pitch-font (font-spec :family "IBM Plex Sans" :size 19 :weight 'light))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
@@ -53,19 +53,21 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 
-(map! :leader "SPC" nil)
-
-(map! :leader "t [" #'smartparens-mode)
-(remove-hook 'doom-first-buffer-hook #'smartparens-global-mode)
-
-(global-set-key (kbd "<menu>") 'save-buffer)
-
-(define-key evil-insert-state-map (kbd "\C-e") 'evil-copy-from-below)
-
 (setq evil-search-wrap 'nil)
 
-(map! :leader :desc "Open vterm popup" "o T" #'+vterm/toggle)
-(map! :leader :desc "Open vterm here" "o t" #'+vterm/here)
+(setq select-enable-clipboard nil)
+
+(add-to-list '+lookup-provider-url-alist '("Startpage" "https://www.startpage.com/sp/search?query=%s"))
+
+(remove-hook 'doom-first-buffer-hook #'ws-butler-global-mode)
+
+(set-file-template! "/__\\.py$g" :trigger "__" :mode 'python-mode)
+
+(setq dired-omit-files "^\\...+$")
+
+(eval-after-load 'dired
+  '(evil-define-key 'normal dired-mode-map
+     (kbd ")") 'dired-omit-mode))
 
 (defun robert/execute-in-shell-and-put-in-buffer (b e)
   "Run current line as shell code and insert/update output."
@@ -90,8 +92,6 @@
 
 (define-key evil-normal-state-map (kbd "Q") 'robert/execute-in-shell-and-put-in-buffer)
 
-(map! :leader :desc "Grep" "/" #'grep)
-
 (defun robert/kill-current-buffer ()
   (interactive)
   (catch 'quit
@@ -109,7 +109,7 @@
                           ((eq response ?d) (diff-buffer-with-file) nil))))))
         (kill-buffer (current-buffer))))))
 (map! :leader :desc "Kill buffer" "b k" #'robert/kill-current-buffer)
-(map! :leader :desc "Kill buffer" "b d" #'robert/kill-current-buffer)
+;; (map! :leader :desc "Kill buffer" "b d" #'robert/kill-current-buffer)
 
 
 ;; This works only when `kill-buffer' is called, does nothing in ibuffer idk
@@ -134,11 +134,41 @@
 
 ;; (advice-add 'kill-buffer :around #'robert/kill-buffer)
 
-(setq dired-omit-files "^\\...+$")
+(defun open-file-externally ()
+  "Open the current file's directory in external file browser."
+  (interactive)
+  (if (equal major-mode 'dired-mode)
+      (consult-file-externally (dired-copy-filename-as-kill))
+      (browse-url (expand-file-name default-directory))))
 
-(eval-after-load 'dired
-  '(evil-define-key 'normal dired-mode-map
-     (kbd ")") 'dired-omit-mode))
+(map! :leader :desc "Browse or open externally" "o x" #'open-file-externally)
+
+;; (remove-hook! 'dired-mode-hook #'dired-omit-mode)
+
+(map! :leader "SPC" nil)
+
+(map! :leader "t [" #'smartparens-mode)
+(remove-hook 'doom-first-buffer-hook #'smartparens-global-mode)
+
+(global-set-key (kbd "<menu>") 'save-buffer)
+
+(define-key evil-insert-state-map (kbd "\C-e") 'evil-copy-from-below)
+
+(map! :leader :desc "Open vterm popup" "o T" #'+vterm/toggle)
+(map! :leader :desc "Open vterm here" "o t" #'+vterm/here)
+
+(global-set-key (kbd "S-<insert>") 'clipboard-yank)
+(define-key evil-visual-state-map (kbd "C-<insert>") 'robert/copy)
+(define-key evil-visual-state-map (kbd "S-<deltechar>") 'clipboard-kill-region)
+
+(defun robert/copy ()
+  "Copy to system clipboard"
+  (interactive)
+  (evil-use-register ?+)
+  (call-interactively 'evil-yank))
+(global-set-key (kbd "C-<insert>") 'robert/copy)
+
+(map! :leader :desc "Grep" "/" #'grep)
 
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
 (add-to-list 'default-frame-alist '(undecorated . t))
@@ -182,35 +212,21 @@
  ;; display-time-day-and-date t
  display-time-default-load-average 3)
 
-(setq select-enable-clipboard nil)
+;;(plist-put +popup-defaults :modeline t)
 
-(global-set-key (kbd "S-<insert>") 'clipboard-yank)
-(define-key evil-visual-state-map (kbd "C-<insert>") 'robert/copy)
-(define-key evil-visual-state-map (kbd "S-<deltechar>") 'clipboard-kill-region)
+(remove-hook '+popup-buffer-mode-hook #'+popup-set-modeline-on-enable-h)
 
-(defun robert/copy ()
-  "Copy to system clipboard"
-  (interactive)
-  (evil-use-register ?+)
-  (call-interactively 'evil-yank))
-(global-set-key (kbd "C-<insert>") 'robert/copy)
+(setq gts-translate-list '(("it" "en")
+                           ("en" "it")
+                           ("it" "es")
+                           ("es" "it")))
 
-(add-to-list '+lookup-provider-url-alist '("Startpage" "https://www.startpage.com/sp/search?query=%s"))
-
-(remove-hook 'doom-first-buffer-hook #'ws-butler-global-mode)
-
-(set-file-template! "/__\\.py$g" :trigger "__" :mode 'python-mode)
-
-(defun open-file-externally ()
-  "Open the current file's directory in external file browser."
-  (interactive)
-  (if (equal major-mode 'dired-mode)
-      (consult-file-externally (dired-copy-filename-as-kill))
-      (browse-url (expand-file-name default-directory))))
-
-(map! :leader :desc "Browse or open externally" "o x" #'open-file-externally)
-
-;; (remove-hook! 'dired-mode-hook #'dired-omit-mode)
+(after! go-translate
+  (setq gts-default-translator
+        (gts-translator
+         :picker (gts-prompt-picker)
+         :engines (list (gts-bing-engine) (gts-google-engine))
+         :render (gts-buffer-render))))
 
 (setq company-idle-delay nil)
 
@@ -228,53 +244,42 @@
 
 (map! :leader :desc "Switch dictionary" "t d" #'fd-switch-dictionary)
 
-(setq gts-translate-list '(("it" "en")
-                           ("en" "it")
-                           ("it" "es")
-                           ("es" "it")))
-
-(after! go-translate
-  (setq gts-default-translator
-        (gts-translator
-         :picker (gts-prompt-picker)
-         :engines (list (gts-bing-engine) (gts-google-engine))
-         :render (gts-buffer-render))))
-
 (eval-after-load "flyspell"
   '(define-key flyspell-mode-map (kbd "C-M-i") nil))
 (global-set-key (kbd "<M-tab>") 'complete-symbol)
 (define-key evil-normal-state-map (kbd "g .") 'flyspell-auto-correct-word)
 
-(map! :leader :desc "toggle font mode" "t v" #'mixed-pitch-mode)
-(map! :leader :desc "Toggle emphasis markers" "t e" #'+org-pretty-mode)
-(map! :leader :desc "Toggle emphasis headings" "t h" #'org-tree-slide-heading-emphasis-toggle)
-(map! :leader :desc "Toggle centered window" "t C" #'centered-window-mode)
+(add-hook 'org-mode-hook 'mixed-pitch-mode)
+(add-hook 'org-mode-hook '+org-pretty-mode)
+(add-hook 'org-mode-hook '(lambda () (text-scale-increase +1)))
+(add-hook 'org-mode-hook '(lambda () (modify-syntax-entry ?\' " ")))
 
-(with-eval-after-load "org"
-  (define-key org-mode-map (kbd "<C-M-return>") #'org-insert-heading))
+(setq org-ellipses " ^ ")
 
- (defun occur-mode-clean-buffer ()
-   "Removes all commentary from the *Occur* buffer, leaving the
+(defun occur-mode-clean-buffer ()
+  "Removes all commentary from the *Occur* buffer, leaving the
  unadorned lines."
-   (interactive)
-   (if (get-buffer "*Occur*")
-       (save-excursion
-         (set-buffer (get-buffer "*Occur*"))
-         (+evil/window-move-left) 
-         (evil-window-increase-width 28)
-         (+popup-mode)
-         (+word-wrap-mode)
-         (text-scale-adjust -1)
-         (goto-char (point-min))
-         (read-only-mode 0)
-         (if (looking-at "^[0-9]+ lines matching \"")
-             (kill-line 1))
-         (while (re-search-forward "^[ \t]*[0-9]+:"
-                                   (point-max)
-                                   t)
-           (replace-match "")
-           (forward-line 1)))
-     (message "There is no buffer named \"*Occur*\".")))
+  (interactive)
+  (if (get-buffer "*Occur*")
+      (save-excursion
+        (set-buffer (get-buffer "*Occur*"))
+        (goto-char (point-min))
+        (read-only-mode 0)
+        ;; (if (looking-at "^[0-9]+ lines matching \"")
+        ;;     (kill-line 1))
+        ;; (flush-lines "^[0-9]+ matches for")
+        (while (re-search-forward "^[ \t]*[0-9]+:"
+                                  (point-max)
+                                  t)
+          (replace-match "")
+          (forward-line 1))
+        (+evil/window-move-left) 
+        (evil-window-increase-width 28)
+        (+popup-mode)
+        (+word-wrap-mode)
+        (text-scale-adjust -1)
+        (read-only-mode 1))
+    (message "There is no buffer named \"*Occur*\".")))
 
 ;; (add-hook 'occur-hook #'occur-mode-clean-buffer)
 
@@ -289,10 +294,13 @@
       :localleader
       :desc "Show Org tree" ";" #'robert/occur-tree-org)
 
-(add-hook 'org-mode-hook 'mixed-pitch-mode)
-(add-hook 'org-mode-hook '+org-pretty-mode)
-(add-hook 'org-mode-hook '(lambda () (text-scale-increase +1)))
-(add-hook 'org-mode-hook '(lambda () (modify-syntax-entry ?\' " ")))
+(map! :leader :desc "toggle font mode" "t v" #'mixed-pitch-mode)
+(map! :leader :desc "Toggle emphasis markers" "t e" #'+org-pretty-mode)
+(map! :leader :desc "Toggle emphasis headings" "t h" #'org-tree-slide-heading-emphasis-toggle)
+(map! :leader :desc "Toggle centered window" "t C" #'centered-window-mode)
+
+(with-eval-after-load "org"
+  (define-key org-mode-map (kbd "<C-M-return>") #'org-insert-heading))
 
 (defun robert/org-tree-slide-play-mode-hook ()
   ;; (interactive)
@@ -409,7 +417,3 @@
 ;;           (seq-filter
 ;;            (robert/org-roam-filter-by-tag name)
 ;;            (org-roam-node-list))))
-
-;;(plist-put +popup-defaults :modeline t)
-
-(remove-hook '+popup-buffer-mode-hook #'+popup-set-modeline-on-enable-h)

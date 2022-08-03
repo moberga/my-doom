@@ -1,47 +1,27 @@
 #+title: Doom emacs Config
-#+PROPERTY: header-args :tangle config.el
+#+PROPERTY: header-args :tangle config.el :results none
 #+options: toc:2
 
 * Table of Contents :toc:
 - [[#doom-default-configuration][Doom Default configuration]]
-- [[#keyboard-shortcuts][Keyboard shortcuts]]
-  - [[#remove-spc-spc-shortcut][Remove SPC-SPC shortcut]]
-  - [[#toggle-smart-parens-mode-and-disable-on-startup][Toggle smart parens mode and disable on startup]]
-  - [[#map-menu-key-to-save][Map menu key to save]]
-  - [[#c-e-vim-shortcut][C-e vim shortcut]]
-  - [[#evil-search-wrap][Evil-search wrap]]
-  - [[#switch-vtermtoggle-and-vtermhere][Switch +vterm/toggle and +vterm/here]]
-  - [[#q-to-execute-line-in-shell][Q to execute line in shell]]
-  - [[#grep][Grep]]
-- [[#customize-look][Customize look]]
-  - [[#show-diff-before-close-file][Show diff before close file]]
-  - [[#dired-hide-hidden-files][Dired hide hidden files]]
+- [[#general-configuration][General configuration]]
+  - [[#variables][Variables]]
+  - [[#functions][Functions]]
+  - [[#keyboard][Keyboard]]
+- [[#visuals][Visuals]]
   - [[#maximize-frame-and-remove-decorations][Maximize frame and remove decorations]]
   - [[#customize-splash-screen][Customize splash screen]]
   - [[#show-battery-and-hour][Show battery and hour]]
-- [[#some-generic-custom-variablesmappings][Some generic custom variables/mappings]]
-  - [[#clipboard-like-vim][Clipboard like vim]]
-  - [[#ctrlins-shiftins-always-system-clipboard][Ctrl+ins, Shift+ins always system clipboard]]
-  - [[#add-startpage-search-engine-for-search-online][Add startpage search engine for search online]]
-  - [[#turn-off-ws-butler-mode][Turn off ws-butler-mode]]
-  - [[#template-di-python][Template di python]]
-- [[#open-directory-in-external-file-manager][Open directory in external file manager]]
+  - [[#popups][Popups]]
 - [[#language][Language]]
-  - [[#disable-company-popup-on-startup][Disable company popup on startup]]
-  - [[#front-end-company-box][Front-end company-box]]
-  - [[#function-that-switches-between-two-dictionaries][Function that switches between two dictionaries]]
-  - [[#translation][Translation]]
-  - [[#flyspell][Flyspell]]
+  - [[#variables-1][Variables]]
+  - [[#functions-1][Functions]]
+  - [[#keyboard-1][Keyboard]]
 - [[#org][ORG]]
-  - [[#some-useful-shortcuts][Some useful shortcuts]]
-  - [[#occur-buffer-for-tree-view-of-org-mode-headers][Occur Buffer for tree view of org mode headers]]
-  - [[#hooks-org-mode][Hooks org-mode]]
-  - [[#org-tree-slide-mode][Org-tree-slide-mode]]
-  - [[#org-caputre-notes-templates][Org-caputre notes templates]]
-  - [[#org-journal-config][Org-journal config]]
-  - [[#org-roam-config][Org-roam config]]
-  - [[#shortcuts-for-org-roam][Shortcuts for org-roam]]
-- [[#popups][Popups]]
+  - [[#variables-2][Variables]]
+  - [[#functions-2][Functions]]
+  - [[#keyboard-2][Keyboard]]
+  - [[#org-functionality][Org functionality]]
 
 * Doom Default configuration
 Standard configuration of Doom Emacs
@@ -68,7 +48,7 @@ Standard configuration of Doom Emacs
 ;;
 ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
 ;; font string. You generally only need these two:
-(setq doom-font (font-spec :family "IBM Plex Mono" :size 17) ;; :weight 'regular)
+(setq doom-font (font-spec :family "BlexMono Nerd Font" :size 17) ;; :weight 'regular)
       doom-variable-pitch-font (font-spec :family "IBM Plex Sans" :size 19 :weight 'light))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
@@ -104,55 +84,59 @@ Standard configuration of Doom Emacs
 
 #+end_src
 
-* Keyboard shortcuts
-** Remove SPC-SPC shortcut
-
-#+begin_src emacs-lisp
-(map! :leader "SPC" nil)
-#+end_src
-
-** Toggle smart parens mode and disable on startup
-
-#+begin_src emacs-lisp
-(map! :leader "t [" #'smartparens-mode)
-(remove-hook 'doom-first-buffer-hook #'smartparens-global-mode)
-#+end_src
-
-** Map menu key to save
-
-#+begin_src emacs-lisp
-(global-set-key (kbd "<menu>") 'save-buffer)
-#+end_src
-
-
-** C-e vim shortcut
-Aggiunge la scorciatoia per copiare quello che è sotto
-
-#+begin_src emacs-lisp
-(define-key evil-insert-state-map (kbd "\C-e") 'evil-copy-from-below)
-#+end_src
-
-** Evil-search wrap
+* General configuration
+** Variables
+*** Evil-search wrap
 When executing macros they stop at the end of the file.
 
 #+begin_src emacs-lisp
 (setq evil-search-wrap 'nil)
 #+end_src
 
-** Switch +vterm/toggle and +vterm/here
+*** Clipboard like vim
 
 #+begin_src emacs-lisp
-(map! :leader :desc "Open vterm popup" "o T" #'+vterm/toggle)
-(map! :leader :desc "Open vterm here" "o t" #'+vterm/here)
+(setq select-enable-clipboard nil)
 #+end_src
 
-** Q to execute line in shell
+*** Add startpage search engine for search online
+
+#+begin_src emacs-lisp
+(add-to-list '+lookup-provider-url-alist '("Startpage" "https://www.startpage.com/sp/search?query=%s"))
+#+end_src
+
+*** Turn off ws-butler-mode
+
+#+begin_src emacs-lisp
+(remove-hook 'doom-first-buffer-hook #'ws-butler-global-mode)
+#+end_src
+
+*** Template di python
+
+#+begin_src emacs-lisp
+(set-file-template! "/__\\.py$g" :trigger "__" :mode 'python-mode)
+#+end_src
+
+*** Dired hide hidden files
+
+From [[https://qerub.se/hiding-hidden-files-in-emacs-dired][here]] and [[https://stackoverflow.com/questions/31363541/how-to-map-emacs-evil-keys-to-dired-plus][here]].
+
+#+begin_src emacs-lisp 
+(setq dired-omit-files "^\\...+$")
+
+(eval-after-load 'dired
+  '(evil-define-key 'normal dired-mode-map
+     (kbd ")") 'dired-omit-mode))
+#+end_src
+
+** Functions
+*** Q to execute line in shell
 
 From [[https://emacs.stackexchange.com/questions/55506/run-current-line-or-selection-in-shell-then-insert-result-in-emacs-buffer-acme][here]].
 This function exectutes the line in shell and puts the output under the line
 with the command. Repeating the command updates the output.
 
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp
 (defun robert/execute-in-shell-and-put-in-buffer (b e)
   "Run current line as shell code and insert/update output."
   (interactive (list (line-beginning-position)
@@ -177,17 +161,10 @@ with the command. Repeating the command updates the output.
 (define-key evil-normal-state-map (kbd "Q") 'robert/execute-in-shell-and-put-in-buffer)
 #+end_src
 
-** Grep
-
-#+begin_src emacs-lisp
-(map! :leader :desc "Grep" "/" #'grep)
-#+end_src
-
-* Customize look
-** Show diff before close file
+*** Show diff before close file
 From [[https://emacs.stackexchange.com/questions/3245/kill-buffer-prompt-with-option-to-diff-the-changes/3363#3363][here]]. Code from 2014.
 
-#+begin_src emacs-lisp :results none
+#+begin_src emacs-lisp 
 (defun robert/kill-current-buffer ()
   (interactive)
   (catch 'quit
@@ -205,7 +182,7 @@ From [[https://emacs.stackexchange.com/questions/3245/kill-buffer-prompt-with-op
                           ((eq response ?d) (diff-buffer-with-file) nil))))))
         (kill-buffer (current-buffer))))))
 (map! :leader :desc "Kill buffer" "b k" #'robert/kill-current-buffer)
-(map! :leader :desc "Kill buffer" "b d" #'robert/kill-current-buffer)
+;; (map! :leader :desc "Kill buffer" "b d" #'robert/kill-current-buffer)
 
 
 ;; This works only when `kill-buffer' is called, does nothing in ibuffer idk
@@ -231,18 +208,76 @@ From [[https://emacs.stackexchange.com/questions/3245/kill-buffer-prompt-with-op
 ;; (advice-add 'kill-buffer :around #'robert/kill-buffer)
 #+end_src
 
-** Dired hide hidden files
+*** Open directory in external file manager
 
-From [[https://qerub.se/hiding-hidden-files-in-emacs-dired][here]] and [[https://stackoverflow.com/questions/31363541/how-to-map-emacs-evil-keys-to-dired-plus][here]].
+#+begin_src emacs-lisp
+(defun open-file-externally ()
+  "Open the current file's directory in external file browser."
+  (interactive)
+  (if (equal major-mode 'dired-mode)
+      (consult-file-externally (dired-copy-filename-as-kill))
+      (browse-url (expand-file-name default-directory))))
 
-#+begin_src emacs-lisp :results none
-(setq dired-omit-files "^\\...+$")
+(map! :leader :desc "Browse or open externally" "o x" #'open-file-externally)
 
-(eval-after-load 'dired
-  '(evil-define-key 'normal dired-mode-map
-     (kbd ")") 'dired-omit-mode))
+;; (remove-hook! 'dired-mode-hook #'dired-omit-mode)
 #+end_src
 
+** Keyboard 
+*** Remove SPC-SPC shortcut
+
+#+begin_src emacs-lisp
+(map! :leader "SPC" nil)
+#+end_src
+
+*** Toggle smart parens mode and disable on startup
+
+#+begin_src emacs-lisp
+(map! :leader "t [" #'smartparens-mode)
+(remove-hook 'doom-first-buffer-hook #'smartparens-global-mode)
+#+end_src
+
+*** Map menu key to save
+
+#+begin_src emacs-lisp
+(global-set-key (kbd "<menu>") 'save-buffer)
+#+end_src
+
+*** C-e vim shortcut
+Aggiunge la scorciatoia per copiare quello che è sotto
+
+#+begin_src emacs-lisp
+(define-key evil-insert-state-map (kbd "\C-e") 'evil-copy-from-below)
+#+end_src
+
+*** Switch +vterm/toggle and +vterm/here
+
+#+begin_src emacs-lisp
+(map! :leader :desc "Open vterm popup" "o T" #'+vterm/toggle)
+(map! :leader :desc "Open vterm here" "o t" #'+vterm/here)
+#+end_src
+
+*** Ctrl+ins, Shift+ins always system clipboard
+#+begin_src emacs-lisp
+(global-set-key (kbd "S-<insert>") 'clipboard-yank)
+(define-key evil-visual-state-map (kbd "C-<insert>") 'robert/copy)
+(define-key evil-visual-state-map (kbd "S-<deltechar>") 'clipboard-kill-region)
+
+(defun robert/copy ()
+  "Copy to system clipboard"
+  (interactive)
+  (evil-use-register ?+)
+  (call-interactively 'evil-yank))
+(global-set-key (kbd "C-<insert>") 'robert/copy)
+#+end_src
+
+*** Grep
+
+#+begin_src emacs-lisp
+(map! :leader :desc "Grep" "/" #'grep)
+#+end_src
+
+* Visuals
 ** Maximize frame and remove decorations
 
 From [[https://emacs.stackexchange.com/questions/2999/how-to-maximize-my-emacs-frame-on-start-up][here]].
@@ -309,92 +344,25 @@ This is the image splash image for the GUI.
 
 #+end_src
 
-* Some generic custom variables/mappings
-** Clipboard like vim
+** Popups
+
+From [[https://docs.doomemacs.org/latest/modules/ui/popup/][here]].
+By default, the mode-line is hidden in popups. To disable this, you can either:
+Change the default :modeline property in +popup-defaults: 
 
 #+begin_src emacs-lisp
-(setq select-enable-clipboard nil)
+;;(plist-put +popup-defaults :modeline t)
 #+end_src
 
-** Ctrl+ins, Shift+ins always system clipboard
+Completely disable management of the mode-line in popups: 
 
 #+begin_src emacs-lisp
-(global-set-key (kbd "S-<insert>") 'clipboard-yank)
-(define-key evil-visual-state-map (kbd "C-<insert>") 'robert/copy)
-(define-key evil-visual-state-map (kbd "S-<deltechar>") 'clipboard-kill-region)
-
-(defun robert/copy ()
-  "Copy to system clipboard"
-  (interactive)
-  (evil-use-register ?+)
-  (call-interactively 'evil-yank))
-(global-set-key (kbd "C-<insert>") 'robert/copy)
-#+end_src
-
-** Add startpage search engine for search online
-
-#+begin_src emacs-lisp
-(add-to-list '+lookup-provider-url-alist '("Startpage" "https://www.startpage.com/sp/search?query=%s"))
-#+end_src
-
-** Turn off ws-butler-mode
-
-#+begin_src emacs-lisp
-(remove-hook 'doom-first-buffer-hook #'ws-butler-global-mode)
-#+end_src
-** Template di python
-
-#+begin_src emacs-lisp
-(set-file-template! "/__\\.py$g" :trigger "__" :mode 'python-mode)
-#+end_src
-
-* Open directory in external file manager
-
-#+begin_src emacs-lisp
-(defun open-file-externally ()
-  "Open the current file's directory in external file browser."
-  (interactive)
-  (if (equal major-mode 'dired-mode)
-      (consult-file-externally (dired-copy-filename-as-kill))
-      (browse-url (expand-file-name default-directory))))
-
-(map! :leader :desc "Browse or open externally" "o x" #'open-file-externally)
-
-;; (remove-hook! 'dired-mode-hook #'dired-omit-mode)
+(remove-hook '+popup-buffer-mode-hook #'+popup-set-modeline-on-enable-h)
 #+end_src
 
 * Language
-** Disable company popup on startup
-
-#+begin_src emacs-lisp
-(setq company-idle-delay nil)
-#+end_src
-
-** Front-end company-box
-
-Useful when in variable pitch mode.
-
-#+begin_src emacs-lisp
-(add-hook 'company-mode-hook 'company-box-mode)
-#+end_src
-
-** Function that switches between two dictionaries
-
-#+begin_src emacs-lisp
-(after! ispell
-  (ispell-change-dictionary "italian"))
-
-(defun fd-switch-dictionary()
- (interactive)
- (let* ((dic ispell-current-dictionary)
-        (change (if (string= dic "italian") "english" "italian")))
-  (ispell-change-dictionary change)
-  (message "Dictionary switched from %s to %s" dic change)))
-
-(map! :leader :desc "Switch dictionary" "t d" #'fd-switch-dictionary)
-#+end_src
-
-** Translation
+** Variables
+*** Translation
 
 #+begin_src emacs-lisp
 (setq gts-translate-list '(("it" "en")
@@ -410,7 +378,40 @@ Useful when in variable pitch mode.
          :render (gts-buffer-render))))
 #+end_src
 
-** Flyspell
+*** Disable company popup on startup
+
+#+begin_src emacs-lisp
+(setq company-idle-delay nil)
+#+end_src
+
+*** Front-end company-box
+
+Useful when in variable pitch mode.
+
+#+begin_src emacs-lisp
+(add-hook 'company-mode-hook 'company-box-mode)
+#+end_src
+
+** Functions
+*** Function that switches between two dictionaries
+
+#+begin_src emacs-lisp
+(after! ispell
+  (ispell-change-dictionary "italian"))
+
+(defun fd-switch-dictionary()
+ (interactive)
+ (let* ((dic ispell-current-dictionary)
+        (change (if (string= dic "italian") "english" "italian")))
+  (ispell-change-dictionary change)
+  (message "Dictionary switched from %s to %s" dic change)))
+
+(map! :leader :desc "Switch dictionary" "t d" #'fd-switch-dictionary)
+#+end_src
+
+** Keyboard
+
+*** Flyspell
 Rimuove la scorciatoia di default per la correzione automatica e ne aggiunge un'altra con g.
 
 #+begin_src emacs-lisp
@@ -421,50 +422,60 @@ Rimuove la scorciatoia di default per la correzione automatica e ne aggiunge un'
 #+end_src
 
 * ORG
-** Some useful shortcuts
+** Variables
+*** Hooks org-mode
 
 #+begin_src emacs-lisp
-(map! :leader :desc "toggle font mode" "t v" #'mixed-pitch-mode)
-(map! :leader :desc "Toggle emphasis markers" "t e" #'+org-pretty-mode)
-(map! :leader :desc "Toggle emphasis headings" "t h" #'org-tree-slide-heading-emphasis-toggle)
-(map! :leader :desc "Toggle centered window" "t C" #'centered-window-mode)
-
-(with-eval-after-load "org"
-  (define-key org-mode-map (kbd "<C-M-return>") #'org-insert-heading))
+(add-hook 'org-mode-hook 'mixed-pitch-mode)
+(add-hook 'org-mode-hook '+org-pretty-mode)
+(add-hook 'org-mode-hook '(lambda () (text-scale-increase +1)))
+(add-hook 'org-mode-hook '(lambda () (modify-syntax-entry ?\' " ")))
 #+end_src
 
-** Occur Buffer for tree view of org mode headers
+*** Org-ellipses
+
+#+begin_src emacs-lisp
+(setq org-ellipses " ^ ")
+#+end_src
+
+** Functions
+*** Occur Buffer for tree view of org mode headers
 
 From the [[https://www.emacswiki.org/emacs/OccurMode#h5o-7][Emacs Wiki]]
 
-This gets rid of the line numbers and the header line, so that the result is more like the output from ‘grep’. You might want to bind this to C-c C-x.
+This gets rid of the line numbers and the header line, so that the result
+is more like the output from ‘grep’. You might want to bind this to C-c C-x.
 
 Then use =doom/window-maximize-buffer= to hide the sidebar.
- 
 
-#+begin_src emacs-lisp
- (defun occur-mode-clean-buffer ()
-   "Removes all commentary from the *Occur* buffer, leaving the
+Unable to delete the header line (*number* matches for *match* in buffer: *buffer*).
+Text is read only.
+
+#+begin_src emacs-lisp 
+(defun occur-mode-clean-buffer ()
+  "Removes all commentary from the *Occur* buffer, leaving the
  unadorned lines."
-   (interactive)
-   (if (get-buffer "*Occur*")
-       (save-excursion
-         (set-buffer (get-buffer "*Occur*"))
-         (+evil/window-move-left) 
-         (evil-window-increase-width 28)
-         (+popup-mode)
-         (+word-wrap-mode)
-         (text-scale-adjust -1)
-         (goto-char (point-min))
-         (read-only-mode 0)
-         (if (looking-at "^[0-9]+ lines matching \"")
-             (kill-line 1))
-         (while (re-search-forward "^[ \t]*[0-9]+:"
-                                   (point-max)
-                                   t)
-           (replace-match "")
-           (forward-line 1)))
-     (message "There is no buffer named \"*Occur*\".")))
+  (interactive)
+  (if (get-buffer "*Occur*")
+      (save-excursion
+        (set-buffer (get-buffer "*Occur*"))
+        (goto-char (point-min))
+        (read-only-mode 0)
+        ;; (if (looking-at "^[0-9]+ lines matching \"")
+        ;;     (kill-line 1))
+        ;; (flush-lines "^[0-9]+ matches for")
+        (while (re-search-forward "^[ \t]*[0-9]+:"
+                                  (point-max)
+                                  t)
+          (replace-match "")
+          (forward-line 1))
+        (+evil/window-move-left) 
+        (evil-window-increase-width 28)
+        (+popup-mode)
+        (+word-wrap-mode)
+        (text-scale-adjust -1)
+        (read-only-mode 1))
+    (message "There is no buffer named \"*Occur*\".")))
 
 ;; (add-hook 'occur-hook #'occur-mode-clean-buffer)
 #+end_src
@@ -482,17 +493,26 @@ Then use =doom/window-maximize-buffer= to hide the sidebar.
       :desc "Show Org tree" ";" #'robert/occur-tree-org)
 #+end_src
 
-** Hooks org-mode
+** Keyboard
+*** Font shortcuts
 
 #+begin_src emacs-lisp
-(add-hook 'org-mode-hook 'mixed-pitch-mode)
-(add-hook 'org-mode-hook '+org-pretty-mode)
-(add-hook 'org-mode-hook '(lambda () (text-scale-increase +1)))
-(add-hook 'org-mode-hook '(lambda () (modify-syntax-entry ?\' " ")))
+(map! :leader :desc "toggle font mode" "t v" #'mixed-pitch-mode)
+(map! :leader :desc "Toggle emphasis markers" "t e" #'+org-pretty-mode)
+(map! :leader :desc "Toggle emphasis headings" "t h" #'org-tree-slide-heading-emphasis-toggle)
+(map! :leader :desc "Toggle centered window" "t C" #'centered-window-mode)
 #+end_src
 
-** Org-tree-slide-mode
-*** Custom play/stop hooks
+*** Insert heading on same level
+
+#+begin_src emacs-lisp
+(with-eval-after-load "org"
+  (define-key org-mode-map (kbd "<C-M-return>") #'org-insert-heading))
+#+end_src
+
+** Org functionality
+*** Org-tree-slide-mode
+**** Custom play/stop hooks
 #+begin_src emacs-lisp
 (defun robert/org-tree-slide-play-mode-hook ()
   ;; (interactive)
@@ -508,7 +528,7 @@ Then use =doom/window-maximize-buffer= to hide the sidebar.
 (add-hook 'org-tree-slide-stop-hook 'robert/org-tree-slide-stop-mode-hook)
 #+end_src
 
-*** Advice remove
+**** Advice remove
 - Allow to start the presentation where the cursor is
 - Remove advice allows to move normally
 - Remove hook of default prettify function
@@ -523,7 +543,7 @@ Then use =doom/window-maximize-buffer= to hide the sidebar.
   (add-hook 'org-tree-slide-mode-hook #'+org-present-prettify-slide-h-custom))
 #+end_src
 
-*** Prettify function without centering
+**** Prettify function without centering
 Copy the configuration of the function, comment out the centering
 portion
 
@@ -562,7 +582,7 @@ portion
     (redraw-display)))
 #+end_src
 
-** Org-caputre notes templates
+*** Org-caputre notes templates
 
 #+begin_src emacs-lisp
 (after! org
@@ -579,7 +599,7 @@ portion
 
 #+end_src
 
-** Org-journal config
+*** Org-journal
 
 #+begin_src emacs-lisp
 (setq org-journal-date-prefix "#+TITLE: "
@@ -590,7 +610,9 @@ portion
 (map! :leader :desc "Org journal new entry" "J" #'org-journal-new-entry)
 #+end_src
 
-** Org-roam config
+*** Org-roam
+
+**** Config
 
 #+begin_src emacs-lisp
 (setq org-roam-directory "~/Documenti/emacs/org/roam")
@@ -616,7 +638,7 @@ portion
 ;;          :target (file+head "%<%Y_%m_%d>.org" "#+title: %<%Y-%m-%d>\n"))))
 #+end_src
 
-** Shortcuts for org-roam
+**** Keyboard
 
 #+begin_src emacs-lisp
 (defun org-roam-node-insert-immediate (arg &rest args)
@@ -642,17 +664,3 @@ portion
 ;;            (org-roam-node-list))))
 #+end_src
 
-* Popups
-
-From [[https://docs.doomemacs.org/latest/modules/ui/popup/][here]].
-By default, the mode-line is hidden in popups. To disable this, you can either:
-Change the default :modeline property in +popup-defaults: 
-
-#+begin_src emacs-lisp
-;;(plist-put +popup-defaults :modeline t)
-#+end_src
-
-Completely disable management of the mode-line in popups: 
-#+begin_src emacs-lisp
-(remove-hook '+popup-buffer-mode-hook #'+popup-set-modeline-on-enable-h)
-#+end_src
