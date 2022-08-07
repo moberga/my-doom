@@ -183,8 +183,10 @@ From [[https://emacs.stackexchange.com/questions/3245/kill-buffer-prompt-with-op
         (kill-buffer (current-buffer))))))
 (map! :leader :desc "Kill buffer" "b k" #'robert/kill-current-buffer)
 ;; (map! :leader :desc "Kill buffer" "b d" #'robert/kill-current-buffer)
+#+end_src
 
 
+#+begin_src emacs-lisp :tangle no
 ;; This works only when `kill-buffer' is called, does nothing in ibuffer idk
 ;; Removed because gives error "error in process sentinel selecting deleted buffer"
 ;; when calling `org-agenda-file-to-front' 
@@ -312,7 +314,7 @@ From [[https://discourse.doomemacs.org/t/how-to-change-your-splash-screen/57][di
 
 This is the ascii splash image.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 ;; (defun my-weebery-is-always-greater ()
 ;; (let* ((banner '("───▄▄─▄████▄▐▄▄▄▌"
 ;;                  "──▐──████▀███▄█▄▌"
@@ -369,7 +371,7 @@ From [[https://docs.doomemacs.org/latest/modules/ui/popup/][here]].
 By default, the mode-line is hidden in popups. To disable this, you can either:
 Change the default :modeline property in +popup-defaults: 
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 ;;(plist-put +popup-defaults :modeline t)
 #+end_src
 
@@ -510,6 +512,119 @@ Text is read only.
       :map org-mode-map
       :localleader
       :desc "Show Org tree" ";" #'robert/occur-tree-org)
+#+end_src
+
+*** Screenshot insertion from screenshot folder
+
+From [[https://old.reddit.com/r/emacs/comments/52q70g/paste_an_image_on_clipboard_to_emacs_org_mode/][reddit]]. 
+I have a shell script to create screenshots with =xfce4-screenshooter= to select
+a region and assign a name.
+Hours wasted for this thing: 10.
+
+#+begin_src emacs-lisp :tangle no
+(defun get-newest-file-from-dir  (path)
+  "Get latest file (including directory) in PATH."
+  (car (directory-files path 'full nil #'file-newer-than-file-p)))
+#+end_src
+
+#+begin_src emacs-lisp 
+(defun aj-fetch-latest (path)
+  (let ((e (f-entries path)))
+    (car (sort e (lambda (a b)
+                   (not (time-less-p (aj-mtime a)
+                                     (aj-mtime b))))))))
+(defun aj-mtime (f) (let ((attrs (file-attributes f))) (nth 5 attrs)))
+
+(defun insert-org-image--time-dependent ()
+  "Moves image from screenshot folder to `buffer-file-name'_media, inserting org-mode link"
+  (interactive)
+  (let* (
+         ;; (indir (expand-file-name ~/Documenti/emacs/screenshots))
+         (infile (aj-fetch-latest "~/Documenti/emacs/screenshots"))
+         ;; (infile (get-newest-file-from-dir "~/Documenti/emacs/screenshots"))
+         (outdir (concat (buffer-file-name) "_media"))
+         (outfile (expand-file-name (file-name-nondirectory infile) outdir)))
+    (unless (file-directory-p outdir)
+      (make-directory outdir t))
+    (when (or
+           (string-equal "0" (format-time-string "%-M" 
+                                                 (time-since (f-modification-time infile))))
+           (string-equal "1" (format-time-string "%-M" 
+                                                 (time-since (f-modification-time infile)))))
+      (rename-file infile outfile)
+      (insert (concat (concat 
+                       "[[./" 
+                       (file-name-nondirectory (buffer-file-name)) 
+                       "_media/" 
+                       (file-name-nondirectory outfile)) 
+                      "]]"))))
+  (newline)
+  (newline))
+
+(defun insert-org-image--time-independent ()
+  "Moves image from screenshot folder to `buffer-file-name'_media, inserting org-mode link"
+  (interactive)
+  (let* (
+         ;; (indir (expand-file-name ~/Documenti/emacs/screenshots))
+         (infile (aj-fetch-latest "~/Documenti/emacs/screenshots"))
+         ;; (infile (get-newest-file-from-dir "~/Documenti/emacs/screenshots"))
+         (outdir (concat (buffer-file-name) "_media"))
+         (outfile (expand-file-name (file-name-nondirectory infile) outdir)))
+    (unless (file-directory-p outdir)
+      (make-directory outdir t))
+    (rename-file infile outfile)
+    (insert (concat (concat 
+                     "[[./" 
+                     (file-name-nondirectory (buffer-file-name)) 
+                     "_media/" 
+                     (file-name-nondirectory outfile)) 
+                    "]]")))
+  (newline)
+  (newline))
+
+(map! :after org
+      :map org-mode-map
+      :localleader
+      :desc "Insert screenshot (last 1m)" "a i" #'insert-org-image--time-dependent)
+(map! :after org
+      :map org-mode-map
+      :localleader
+      :desc "Insert screenshot" "a I" #'insert-org-image--time-independent)
+;; (map! :after org
+;;       :map org-mode-map
+;;       :localleader
+;;       :desc "Insert screenshot" "<print>" #'insert-org-image--time-dependent)
+#+end_src
+
+
+*** Screenshot insertion from within emacs
+
+From [[https://stackoverflow.com/questions/17435995/paste-an-image-on-clipboard-to-emacs-org-mode-file-without-saving-it][here]].
+This allows to take a screenshot with import from within emacs. Cannot move cursor, not very useful.
+#+begin_src emacs-lisp :tangle no
+(defun my-org-screenshot ()
+  "Take a screenshot into a time stamped unique-named file in the
+same directory as the org-buffer and insert a link to this file."
+  (interactive)
+  ;; (org-display-inline-images)
+  (setq filename
+        (concat
+         (make-temp-name
+          (concat (file-name-nondirectory (buffer-file-name))
+                  "_imgs/"
+                  (format-time-string "%Y%m%d_%H%M%S_")) ) ".png"))
+  (unless (file-exists-p (file-name-directory filename))
+    (make-directory (file-name-directory filename)))
+  ; take screenshot
+  (if (eq system-type 'darwin)
+      (call-process "screencapture" nil nil nil "-i" filename))
+  (if (eq system-type 'gnu/linux)
+      (call-process "import" nil nil nil filename))
+  ; insert into file if correctly taken
+  (if (file-exists-p filename)
+    (insert (concat "[[./" filename "]]"))))
+
+
 #+end_src
 
 ** Keyboard
@@ -671,7 +786,10 @@ portion
 (define-key evil-insert-state-map (kbd "C-M-n") 'org-roam-node-insert-immediate)
 
 (map! :leader :desc "Node insert" "n r I" #'org-roam-node-insert)
+#+end_src
 
+??? Don't remember
+#+begin_src emacs-lisp :tangle no
 ;; (defun robert/org-roam-filter-by-tag (tag-name)
 ;;   (lambda (node)
 ;;     member tag-name (org-roam-node-tags node)))

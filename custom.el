@@ -6,6 +6,7 @@
  '(doom-modeline-buffer-file-name-style 'auto)
  '(grep-command "rg --color=auto -nH --null -e ")
  '(org-agenda-files '("/home/rob/Documenti/emacs/org/capture/task.org"))
+ '(org-download-screenshot-method "xfce4-screenshooter -r -o cat > %s")
  '(org-ellipsis " ^ ")
  '(org-latex-default-packages-alist
    '(("AUTO" "inputenc" t

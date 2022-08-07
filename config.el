@@ -111,29 +111,6 @@
 (map! :leader :desc "Kill buffer" "b k" #'robert/kill-current-buffer)
 ;; (map! :leader :desc "Kill buffer" "b d" #'robert/kill-current-buffer)
 
-
-;; This works only when `kill-buffer' is called, does nothing in ibuffer idk
-;; Removed because gives error "error in process sentinel selecting deleted buffer"
-;; when calling `org-agenda-file-to-front' 
-;; (defun robert/kill-buffer (orig-func &optional buffer-or-name)
-;;   (catch 'quit
-;;     (save-window-excursion
-;;       (with-current-buffer buffer-or-name
-;;         (let (done (buf (current-buffer)))
-;;           (when (and buffer-file-name (buffer-modified-p))
-;;             (while (not done)
-;;               (let ((response (read-char-choice
-;;                                (format "Save file %s? (y, n, d, q) " (buffer-file-name buf))
-;;                                '(?y ?n ?d ?q))))
-;;                 (setq done (cond
-;;                             ((eq response ?q) (throw 'quit nil))
-;;                             ((eq response ?y) (save-buffer) t)
-;;                             ((eq response ?n) (set-buffer-modified-p nil) t)
-;;                             ((eq response ?d) (diff-buffer-with-file) nil))))))
-;;           (apply orig-func (list (current-buffer))))))))
-
-;; (advice-add 'kill-buffer :around #'robert/kill-buffer)
-
 (defun open-file-externally ()
   "Open the current file's directory in external file browser."
   (interactive)
@@ -182,24 +159,6 @@
 (add-to-list 'initial-frame-alist '(fullscreen . maximized))
 (add-to-list 'default-frame-alist '(undecorated . t))
 
-;; (defun my-weebery-is-always-greater ()
-;; (let* ((banner '("───▄▄─▄████▄▐▄▄▄▌"
-;;                  "──▐──████▀███▄█▄▌"
-;;                  "▐─▌──█▀▌──▐▀▌▀█▀ "
-;;                  "─▀───▌─▌──▐─▌    "
-;;                  "─────█─█──▐▌█    "))
-;;          (longest-line (apply #'max (mapcar #'length banner))))
-;;     (put-text-property
-;;      (point)
-;;      (dolist (line banner (point))
-;;        (insert (+doom-dashboard--center
-;;                 +doom-dashboard--width
-;;                 (concat line (make-string (max 0 (- longest-line (length line))) 32)))
-;;                "\n"))
-;;      'face 'doom-dashboard-banner)))
-
-;; (setq +doom-dashboard-ascii-banner-fn #'my-weebery-is-always-greater)
-
 (setq fancy-splash-image "~/Pictures/.emacs_mars.png")
 
 (assoc-delete-all "Reload last session" +doom-dashboard-menu-sections)
@@ -220,8 +179,6 @@
  ;; display-time-24hr-format t
  ;; display-time-day-and-date t
  display-time-default-load-average 3)
-
-;;(plist-put +popup-defaults :modeline t)
 
 (remove-hook '+popup-buffer-mode-hook #'+popup-set-modeline-on-enable-h)
 
@@ -302,6 +259,73 @@
       :map org-mode-map
       :localleader
       :desc "Show Org tree" ";" #'robert/occur-tree-org)
+
+(defun aj-fetch-latest (path)
+  (let ((e (f-entries path)))
+    (car (sort e (lambda (a b)
+                   (not (time-less-p (aj-mtime a)
+                                     (aj-mtime b))))))))
+(defun aj-mtime (f) (let ((attrs (file-attributes f))) (nth 5 attrs)))
+
+(defun insert-org-image--time-dependent ()
+  "Moves image from screenshot folder to `buffer-file-name'_media, inserting org-mode link"
+  (interactive)
+  (let* (
+         ;; (indir (expand-file-name ~/Documenti/emacs/screenshots))
+         (infile (aj-fetch-latest "~/Documenti/emacs/screenshots"))
+         ;; (infile (get-newest-file-from-dir "~/Documenti/emacs/screenshots"))
+         (outdir (concat (buffer-file-name) "_media"))
+         (outfile (expand-file-name (file-name-nondirectory infile) outdir)))
+    (unless (file-directory-p outdir)
+      (make-directory outdir t))
+    (when (or
+           (string-equal "0" (format-time-string "%-M" 
+                                                 (time-since (f-modification-time infile))))
+           (string-equal "1" (format-time-string "%-M" 
+                                                 (time-since (f-modification-time infile)))))
+      (rename-file infile outfile)
+      (insert (concat (concat 
+                       "[[./" 
+                       (file-name-nondirectory (buffer-file-name)) 
+                       "_media/" 
+                       (file-name-nondirectory outfile)) 
+                      "]]"))))
+  (newline)
+  (newline))
+
+(defun insert-org-image--time-independent ()
+  "Moves image from screenshot folder to `buffer-file-name'_media, inserting org-mode link"
+  (interactive)
+  (let* (
+         ;; (indir (expand-file-name ~/Documenti/emacs/screenshots))
+         (infile (aj-fetch-latest "~/Documenti/emacs/screenshots"))
+         ;; (infile (get-newest-file-from-dir "~/Documenti/emacs/screenshots"))
+         (outdir (concat (buffer-file-name) "_media"))
+         (outfile (expand-file-name (file-name-nondirectory infile) outdir)))
+    (unless (file-directory-p outdir)
+      (make-directory outdir t))
+    (rename-file infile outfile)
+    (insert (concat (concat 
+                     "[[./" 
+                     (file-name-nondirectory (buffer-file-name)) 
+                     "_media/" 
+                     (file-name-nondirectory outfile)) 
+                    "]]")))
+  (newline)
+  (newline))
+
+(map! :after org
+      :map org-mode-map
+      :localleader
+      :desc "Insert screenshot (last 1m)" "a i" #'insert-org-image--time-dependent)
+(map! :after org
+      :map org-mode-map
+      :localleader
+      :desc "Insert screenshot" "a I" #'insert-org-image--time-independent)
+;; (map! :after org
+;;       :map org-mode-map
+;;       :localleader
+;;       :desc "Insert screenshot" "<print>" #'insert-org-image--time-dependent)
 
 (map! :leader :desc "toggle font mode" "t v" #'mixed-pitch-mode)
 (map! :leader :desc "Toggle emphasis markers" "t e" #'+org-pretty-mode)
@@ -416,13 +440,3 @@
 (define-key evil-insert-state-map (kbd "C-M-n") 'org-roam-node-insert-immediate)
 
 (map! :leader :desc "Node insert" "n r I" #'org-roam-node-insert)
-
-;; (defun robert/org-roam-filter-by-tag (tag-name)
-;;   (lambda (node)
-;;     member tag-name (org-roam-node-tags node)))
-
-;; (defun robert/org-roam-list-notes-by-tag (tag-name)
-;;   (mapcar #'org-roam-node-file
-;;           (seq-filter
-;;            (robert/org-roam-filter-by-tag name)
-;;            (org-roam-node-list))))
