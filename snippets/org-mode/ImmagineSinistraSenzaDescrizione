@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: Immagine sinistra senza descrizione
-# key: <is
-# --
-
-#+ATTR_LATEX: :float wrap :width 0.45\textwidth :placement {l}{0.4\textwidth}
-$0

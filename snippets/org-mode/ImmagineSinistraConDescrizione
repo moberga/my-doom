@@ -1,9 +1,0 @@
-# -*- mode: snippet -*-
-# name: Immagine sinistra con descrizione
-# key: <isd
-# --
-
-#+ATTR_LATEX: :float wrap :width 0.45\textwidth :placement {l}{0.45\textwidth} :caption \caption{${2:Descrizione_Immagine}}
-$1
-
-$0

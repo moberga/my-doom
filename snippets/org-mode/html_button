@@ -1,0 +1,63 @@
+# -*- mode: snippet -*-
+# name: html button
+# uuid: 
+# key: <htmlbutton
+# condition: t
+# --
+:html_button:
+# from [[https://www.w3schools.com/howto/howto_js_scroll_to_top.asp][w3schools]]
+
+#+HTML_HEAD: <style>
+#+HTML_HEAD: body {
+  #+HTML_HEAD: font-family: Arial, Helvetica, sans-serif;
+  #+HTML_HEAD: font-size: 20px;
+#+HTML_HEAD: }
+#+HTML_HEAD: 
+#+HTML_HEAD: #myBtn {
+  #+HTML_HEAD: display: none;
+  #+HTML_HEAD: position: fixed;
+  #+HTML_HEAD: top: 20px;
+  #+HTML_HEAD: right: 30px;
+  #+HTML_HEAD: z-index: 99;
+  #+HTML_HEAD: font-size: 18px;
+  #+HTML_HEAD: border: none;
+  #+HTML_HEAD: outline: none;
+  #+HTML_HEAD: background-color: #A5573E;
+  #+HTML_HEAD: color: white;
+  #+HTML_HEAD: cursor: pointer;
+  #+HTML_HEAD: padding: 15px;
+  #+HTML_HEAD: border-radius: 4px;
+#+HTML_HEAD: }
+#+HTML_HEAD: 
+#+HTML_HEAD: #myBtn:hover {
+  #+HTML_HEAD: background-color: #555;
+#+HTML_HEAD: }
+#+HTML_HEAD: </style>
+
+#+begin_export html
+<button onclick="topFunction()" id="myBtn" title="Torna in cima">~⇑~</button>
+
+<script>
+//Get the button
+var mybutton = document.getElementById("myBtn");
+
+// When the user scrolls down 20px from the top of the document, show the button
+window.onscroll = function() {scrollFunction()};
+
+function scrollFunction() {
+  if (document.body.scrollTop > 1000 || document.documentElement.scrollTop > 1000) {
+    mybutton.style.display = "block";
+  } else {
+    mybutton.style.display = "none";
+  }
+}
+
+// When the user clicks on the button, scroll to the top of the document
+function topFunction() {
+  document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
+}
+</script>
+#+end_export
+
+:end:

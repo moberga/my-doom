@@ -1,0 +1,17 @@
+# -*- mode: snippet -*-
+# name: Minipage
+# uuid: 
+# key: <minipage
+# condition: t
+# --
+#+LATEX:\begin{minipage}[t]{0.5\linewidth}
+${1:paragrafo}
+#+LATEX:\end{minipage}
+
+#+LATEX:\begin{minipage}[t]{0.5\linewidth}
+#+LATEX: \vspace{-\ht\strutbox} %or some other value.
+${3:$(when (> (length yas-text) 0) "#+LATEX: \\\captionof{figure}{")}$3${3:$(when (> (length yas-text) 0) "}")}
+${2:immagine}
+#+LATEX:\end{minipage}
+
+$0

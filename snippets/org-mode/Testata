@@ -4,7 +4,7 @@
 # --
 
 :Org_properties:
-#+EXPORT_FILE_NAME: ${1:Nome_file}.pdf
+#+EXPORT_FILE_NAME: "${1:`(file-name-base (buffer-name))`}.pdf"
 
 #+LANGUAGE: it
 
@@ -29,6 +29,7 @@
 #+LATEX_HEADER: \lhead{\bfseries ${2:Intestazione_sinistra}}
 #+LATEX_HEADER: \rhead{\bfseries ${3:Intestazione_destra}}
 #+LATEX_HEADER: \usepackage[italian]{babel}
+#+LATEX_HEADER: \usepackage[labelformat=empty]{caption}
 # #+LATEX_HEADER: \usepackage{isotope}
 
 # INDICE ANANLITICO

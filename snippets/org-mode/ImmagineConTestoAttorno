@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: Immagine con testo attorno
+# key: <is
+# --
+
+#+ATTR_LATEX: :float wrap :placement {h}{0.5\textwidth} :width 0.45\textwidth 
+$0

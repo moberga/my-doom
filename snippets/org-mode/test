@@ -1,0 +1,5 @@
+# key: <coso
+# name: test
+# condition: t
+# --
+func ${1:$(when (> (length yas-text) 0) "(")}$1${1:$(when (> (length yas-text) 0) ") ")}FuncName

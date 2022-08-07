@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: Immagine sinistra con descrizione
+# key: <isd
+# --
+
+#+ATTR_LATEX: :float wrap :placement {h}{0.5\textwidth} :width 0.45\textwidth ${2:$(when (> (length yas-text) 0) ":caption \\\caption{")}$2${2:$(when (> (length yas-text) 0) "}")}
+$1
+
+$0
