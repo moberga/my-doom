@@ -11,6 +11,7 @@
 - [[#visuals][Visuals]]
   - [[#maximize-frame-and-remove-decorations][Maximize frame and remove decorations]]
   - [[#customize-splash-screen][Customize splash screen]]
+  - [[#modeline-font-size][Modeline font size]]
   - [[#show-battery-and-hour][Show battery and hour]]
   - [[#popups][Popups]]
 - [[#language][Language]]
@@ -182,7 +183,7 @@ From [[https://emacs.stackexchange.com/questions/3245/kill-buffer-prompt-with-op
                           ((eq response ?d) (diff-buffer-with-file) nil))))))
         (kill-buffer (current-buffer))))))
 (map! :leader :desc "Kill buffer" "b k" #'robert/kill-current-buffer)
-;; (map! :leader :desc "Kill buffer" "b d" #'robert/kill-current-buffer)
+(map! :leader :desc "Kill buffer" "b d" #'kill-buffer-and-window)
 #+end_src
 
 
@@ -315,23 +316,23 @@ From [[https://discourse.doomemacs.org/t/how-to-change-your-splash-screen/57][di
 This is the ascii splash image.
 
 #+begin_src emacs-lisp :tangle no
-;; (defun my-weebery-is-always-greater ()
-;; (let* ((banner '("───▄▄─▄████▄▐▄▄▄▌"
-;;                  "──▐──████▀███▄█▄▌"
-;;                  "▐─▌──█▀▌──▐▀▌▀█▀ "
-;;                  "─▀───▌─▌──▐─▌    "
-;;                  "─────█─█──▐▌█    "))
-;;          (longest-line (apply #'max (mapcar #'length banner))))
-;;     (put-text-property
-;;      (point)
-;;      (dolist (line banner (point))
-;;        (insert (+doom-dashboard--center
-;;                 +doom-dashboard--width
-;;                 (concat line (make-string (max 0 (- longest-line (length line))) 32)))
-;;                "\n"))
-;;      'face 'doom-dashboard-banner)))
+(defun my-weebery-is-always-greater ()
+  (let* ((banner '("█▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀█"
+                   "█░░╦─╦╔╗╦─╔╗╔╗╔╦╗╔╗░░█"
+                   "█░░║║║╠─║─║─║║║║║╠─░░█"
+                   "█░░╚╩╝╚╝╚╝╚╝╚╝╩─╩╚╝░░█"
+                   "█▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█"))
+         (longest-line (apply #'max (mapcar #'length banner))))
+    (put-text-property
+     (point)
+     (dolist (line banner (point))
+       (insert (+doom-dashboard--center
+                +doom-dashboard--width
+                (concat line (make-string (max 0 (- longest-line (length line))) 32)))
+               "\n"))
+     'face 'doom-dashboard-banner)))
 
-;; (setq +doom-dashboard-ascii-banner-fn #'my-weebery-is-always-greater)
+(setq +doom-dashboard-ascii-banner-fn #'my-weebery-is-always-greater)
 #+end_src
 
 This is the image splash image for the GUI.
@@ -348,7 +349,20 @@ This is the image splash image for the GUI.
 
 (add-hook! '+doom-dashboard-functions :append
   (insert "\n" (+doom-dashboard--center +doom-dashboard--width "I showed you my config files, pls respond")))
+#+end_src
 
+** Modeline font size
+
+The font size is actually fine, the icons are too big.
+
+#+begin_src emacs-lisp :tangle no
+(custom-set-faces!
+  '(mode-line :family "IBM Plex Mono" :height 1.0)
+  '(mode-line-inactive :family "IBM Plex Mono" :height 1.0))
+#+end_src
+
+#+begin_src emacs-lisp
+(setq all-the-icons-scale-factor 1.0)
 #+end_src
 
 ** Show battery and hour
@@ -467,10 +481,12 @@ From the [[https://www.emacswiki.org/emacs/OccurMode#h5o-7][Emacs Wiki]]
 This gets rid of the line numbers and the header line, so that the result
 is more like the output from ‘grep’. You might want to bind this to C-c C-x.
 
-Then use =doom/window-maximize-buffer= to hide the sidebar.
+Then use =doom/window-maximize-buffer= to hide the occur buffer.
 
 Unable to delete the header line (*number* matches for *match* in buffer: *buffer*).
 Text is read only.
+The occur buffer will be renamed with the name of the buffer from which the
+occur command was called. 
 
 #+begin_src emacs-lisp 
 (defun occur-mode-clean-buffer ()
@@ -492,12 +508,13 @@ Text is read only.
           (forward-line 1))
         (+evil/window-move-left) 
         (evil-window-increase-width 28)
-        (+popup-mode)
+        ;; (+popup-mode)
         (+word-wrap-mode)
         (text-scale-adjust -1)
+        ;; (rename-buffer (concat "*" buff-name "-Occur*"))
+        (occur-rename-buffer nil t)
         (read-only-mode 1))
     (message "There is no buffer named \"*Occur*\".")))
-
 ;; (add-hook 'occur-hook #'occur-mode-clean-buffer)
 #+end_src
 
@@ -514,11 +531,25 @@ Text is read only.
       :desc "Show Org tree" ";" #'robert/occur-tree-org)
 #+end_src
 
+Test of toggle function
+#+begin_src emacs-lisp :tangle no
+(defun robert/toggle-org-occur-tree ()
+  "Toggle the side panel of occur in org mode"
+  (interactive)
+  (let ((occur-buffer-name (concat "*Occur: " (buffer-name) "*" ))
+    ;;if, cond"-Occur*"
+    (if (get-buffer occur-buffer-name)
+        ;;then
+        (with-current-buffer occur-buffer-name
+         
+         ) ()))))
+#+end_src
+
 *** Screenshot insertion from screenshot folder
 
 From [[https://old.reddit.com/r/emacs/comments/52q70g/paste_an_image_on_clipboard_to_emacs_org_mode/][reddit]]. 
 I have a shell script to create screenshots with =xfce4-screenshooter= to select
-a region and assign a name.
+a region and assign a name in a specific path.
 Hours wasted for this thing: 10.
 
 #+begin_src emacs-lisp :tangle no
@@ -595,7 +626,6 @@ Hours wasted for this thing: 10.
 ;;       :localleader
 ;;       :desc "Insert screenshot" "<print>" #'insert-org-image--time-dependent)
 #+end_src
-
 
 *** Screenshot insertion from within emacs
 

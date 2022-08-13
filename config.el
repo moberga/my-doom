@@ -109,7 +109,7 @@
                           ((eq response ?d) (diff-buffer-with-file) nil))))))
         (kill-buffer (current-buffer))))))
 (map! :leader :desc "Kill buffer" "b k" #'robert/kill-current-buffer)
-;; (map! :leader :desc "Kill buffer" "b d" #'robert/kill-current-buffer)
+(map! :leader :desc "Kill buffer" "b d" #'kill-buffer-and-window)
 
 (defun open-file-externally ()
   "Open the current file's directory in external file browser."
@@ -170,6 +170,8 @@
 
 (add-hook! '+doom-dashboard-functions :append
   (insert "\n" (+doom-dashboard--center +doom-dashboard--width "I showed you my config files, pls respond")))
+
+(setq all-the-icons-scale-factor 1.0)
 
 (add-hook 'after-init-hook #'display-battery-mode)
 (add-hook 'after-init-hook #'display-time)
@@ -241,12 +243,13 @@
           (forward-line 1))
         (+evil/window-move-left) 
         (evil-window-increase-width 28)
-        (+popup-mode)
+        ;; (+popup-mode)
         (+word-wrap-mode)
         (text-scale-adjust -1)
+        ;; (rename-buffer (concat "*" buff-name "-Occur*"))
+        (occur-rename-buffer nil t)
         (read-only-mode 1))
     (message "There is no buffer named \"*Occur*\".")))
-
 ;; (add-hook 'occur-hook #'occur-mode-clean-buffer)
 
 (defun robert/occur-tree-org ()
