@@ -55,3 +55,5 @@
 (package! go-translate)
 
 (package! company-box)
+
+(package! nov)

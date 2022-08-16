@@ -129,6 +129,8 @@
 
 (map! :leader :desc "Explore this dir" "x" #'robert/dired-popup-this-location)
 
+(add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
+
 (map! :leader "SPC" nil)
 
 (map! :leader "X" nil)
@@ -156,7 +158,7 @@
 
 (map! :leader :desc "Grep" "/" #'grep)
 
-(add-to-list 'initial-frame-alist '(fullscreen . maximized))
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
 (add-to-list 'default-frame-alist '(undecorated . t))
 
 (setq fancy-splash-image "~/Pictures/.emacs_mars.png")
