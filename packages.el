@@ -57,3 +57,7 @@
 (package! company-box)
 
 (package! nov)
+
+(package! dwim-shell-command)
+
+(package! rainbow-mode)

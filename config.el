@@ -131,6 +131,19 @@
 
 (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
 
+(require 'dwim-shell-command)
+
+(defun robert/dwim-shell-command-add-pages-to-pdf ()
+  "Add the page numbers to a pdf file"
+  (interactive)
+  (dwim-shell-command-on-marked-files
+  "Add the page numbers to a pdf file"
+"
+enscript --fancy-header=footer --header-font='Times-Roman11' -L1 --header='' --footer='|$%|' -o- < <(for i in $(seq 1 400); do echo; done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
+"
+   :utils '("enscript" "pdftk" "ps2pdf" "seq")
+   :extensions "pdf"))
+
 (map! :leader "SPC" nil)
 
 (map! :leader "X" nil)

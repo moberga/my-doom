@@ -245,6 +245,79 @@ Dired split window corresponding to current file directory.
 (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
 #+end_src
 
+*** Dwim functions
+
+Function that adds numbers to a pdf file using enscript. This is from the [[https://www.dry-lab.org/blog/2018/numbering-pages-of-a-pdf][dry-lab]] blog.
+Enscript has a long lasting +bug+ feature that doesn't allow to print footers. But there's a solution:
+I just need to add a =footer.hdr= file in =/usr/share/enscript/= or =~/.enscript/=. Link [[https://askubuntu.com/a/544620][here]].
+
+
+#+begin_src emacs-lisp
+(require 'dwim-shell-command)
+
+(defun robert/dwim-shell-command-add-pages-to-pdf ()
+  "Add the page numbers to a pdf file"
+  (interactive)
+  (dwim-shell-command-on-marked-files
+  "Add the page numbers to a pdf file"
+"
+enscript --fancy-header=footer --header-font='Times-Roman11' -L1 --header='' --footer='|$%|' -o- < <(for i in $(seq 1 400); do echo; done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
+"
+   :utils '("enscript" "pdftk" "ps2pdf" "seq")
+   :extensions "pdf"))
+#+end_src
+
+:footer_contents:
+#+begin_src
+% -- code follows this line --
+%Format: fmodstr    $D{%a %b %d %H:%M:%S %Y}
+%Format: pagenumstr $V$%
+
+%HeaderHeight: 38
+%FooterHeight: 15
+
+/do_header {   % print default simple header
+
+  % Footer
+  gsave
+    d_footer_x d_footer_y HFpt_h 3 div add translate
+    HF setfont
+
+    user_footer_p {
+      d_footer_x  d_footer_y moveto user_footer_left_str show
+
+      d_footer_w user_footer_center_str stringwidth pop sub 2 div
+      0 moveto user_footer_center_str show
+
+      d_footer_x d_footer_w add user_footer_right_str stringwidth pop sub
+      d_footer_y moveto user_footer_right_str show
+    } if
+  grestore
+
+  % Header
+  gsave
+    d_header_x d_header_y HFpt_h 3 div add translate
+    HF setfont
+
+    user_header_p {
+      5 0 moveto user_header_left_str show
+
+      d_header_w user_header_center_str stringwidth pop sub 2 div
+      0 moveto user_header_center_str show
+
+      d_header_w user_header_right_str stringwidth pop sub 5 sub
+      0 moveto user_header_right_str show
+    } {
+      5 0 moveto fname show
+      45 0 rmoveto fmodstr show
+      45 0 rmoveto pagenumstr show
+    } ifelse
+  grestore
+
+} def
+#+end_src
+:end:
+
 ** Keyboard 
 *** Remove SPC-SPC shortcut
 
