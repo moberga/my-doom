@@ -115,7 +115,7 @@
   "Open the current file's directory in external file browser."
   (interactive)
   (if (equal major-mode 'dired-mode)
-      (consult-file-externally (dired-copy-filename-as-kill))
+      (consult-file-externally (dired-get-filename))
       (browse-url (expand-file-name default-directory))))
 
 (map! :leader :desc "Browse or open externally" "o x" #'open-file-externally)
@@ -131,7 +131,8 @@
 
 (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
 
-(require 'dwim-shell-command)
+(use-package dwim-shell-command
+  :commands (dwim-shell-command dwim-shell-command-on-marked-files))
 
 (defun robert/dwim-shell-command-add-pages-to-pdf ()
   "Add the page numbers to a pdf file"
@@ -139,10 +140,24 @@
   (dwim-shell-command-on-marked-files
   "Add the page numbers to a pdf file"
 "
-enscript --fancy-header=footer --header-font='Times-Roman11' -L1 --header='' --footer='|$%|' -o- < <(for i in $(seq 1 400); do echo; done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
+enscript --fancy-header=footer --header-font='Times-Roman11' \
+-L1 --header='' --footer='|$%|' -o- < <(for i in $(seq 1 400); do echo; \
+done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
 "
    :utils '("enscript" "pdftk" "ps2pdf" "seq")
    :extensions "pdf"))
+
+(defun robert/dwim-shell-command-mark-pdf-with-file-name ()
+  "Add pdf name in header of file"
+  (interactive)
+  (let ((filename (file-name-base (dired-get-filename))))
+    (dwim-shell-command-on-marked-files
+     "Add pdf name in header of file"
+     (format " enscript --fancy-header=footer --header-font='Times-Roman11' -L1 --header=''%s'||' --footer='' -o- < <(for i in $(seq 1 400); do echo; done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_marked.pdf'" 
+             filename)))
+  :utils '("enscript" "pdftk" "ps2pdf" "seq")
+  :extensions "pdf"
+  :silent-success)
 
 (map! :leader "SPC" nil)
 
@@ -345,10 +360,15 @@ enscript --fancy-header=footer --header-font='Times-Roman11' -L1 --header='' --f
 ;;       :localleader
 ;;       :desc "Insert screenshot" "<print>" #'insert-org-image--time-dependent)
 
-(map! :leader :desc "toggle font mode" "t v" #'mixed-pitch-mode)
-(map! :leader :desc "Toggle emphasis markers" "t e" #'+org-pretty-mode)
-(map! :leader :desc "Toggle emphasis headings" "t h" #'org-tree-slide-heading-emphasis-toggle)
-(map! :leader :desc "Toggle centered window" "t C" #'centered-window-mode)
+(map! :after org
+      :map org-mode-map
+      :localleader
+      :desc "Toggle font style" "F" #'mixed-pitch-mode)
+
+(map! :after org
+      :map org-mode-map
+      :localleader
+      :desc "Pretty-mode toggle" "P" #'+org-pretty-mode)
 
 (with-eval-after-load "org"
   (define-key org-mode-map (kbd "<C-M-return>") #'org-insert-heading))

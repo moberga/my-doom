@@ -211,14 +211,17 @@ From [[https://emacs.stackexchange.com/questions/3245/kill-buffer-prompt-with-op
 ;; (advice-add 'kill-buffer :around #'robert/kill-buffer)
 #+end_src
 
-*** Open directory in external file manager
+*** Open externally
+
+Open file at point externally when in =dired-mode= (really useful for pdf files) or browse
+the default directory of the currently open file in any other mode.
 
 #+begin_src emacs-lisp
 (defun open-file-externally ()
   "Open the current file's directory in external file browser."
   (interactive)
   (if (equal major-mode 'dired-mode)
-      (consult-file-externally (dired-copy-filename-as-kill))
+      (consult-file-externally (dired-get-filename))
       (browse-url (expand-file-name default-directory))))
 
 (map! :leader :desc "Browse or open externally" "o x" #'open-file-externally)
@@ -253,20 +256,41 @@ I just need to add a =footer.hdr= file in =/usr/share/enscript/= or =~/.enscript
 
 
 #+begin_src emacs-lisp
-(require 'dwim-shell-command)
+(use-package dwim-shell-command
+  :commands (dwim-shell-command dwim-shell-command-on-marked-files))
+#+end_src
 
+#+begin_src emacs-lisp
 (defun robert/dwim-shell-command-add-pages-to-pdf ()
   "Add the page numbers to a pdf file"
   (interactive)
   (dwim-shell-command-on-marked-files
   "Add the page numbers to a pdf file"
 "
-enscript --fancy-header=footer --header-font='Times-Roman11' -L1 --header='' --footer='|$%|' -o- < <(for i in $(seq 1 400); do echo; done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
+enscript --fancy-header=footer --header-font='Times-Roman11' \
+-L1 --header='' --footer='|$%|' -o- < <(for i in $(seq 1 400); do echo; \
+done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
 "
    :utils '("enscript" "pdftk" "ps2pdf" "seq")
    :extensions "pdf"))
 #+end_src
 
+#+begin_src emacs-lisp
+(defun robert/dwim-shell-command-mark-pdf-with-file-name ()
+  "Add pdf name in header of file"
+  (interactive)
+  (let ((filename (file-name-base (dired-get-filename))))
+    (dwim-shell-command-on-marked-files
+     "Add pdf name in header of file"
+     (format " enscript --fancy-header=footer --header-font='Times-Roman11' -L1 --header=''%s'||' --footer='' -o- < <(for i in $(seq 1 400); do echo; done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_marked.pdf'" 
+             filename)))
+  :utils '("enscript" "pdftk" "ps2pdf" "seq")
+  :extensions "pdf"
+  :silent-success)
+
+#+end_src
+
+#+end_src
 :footer_contents:
 #+begin_src
 % -- code follows this line --
@@ -740,10 +764,23 @@ same directory as the org-buffer and insert a link to this file."
 *** Font shortcuts
 
 #+begin_src emacs-lisp
-(map! :leader :desc "toggle font mode" "t v" #'mixed-pitch-mode)
-(map! :leader :desc "Toggle emphasis markers" "t e" #'+org-pretty-mode)
-(map! :leader :desc "Toggle emphasis headings" "t h" #'org-tree-slide-heading-emphasis-toggle)
-(map! :leader :desc "Toggle centered window" "t C" #'centered-window-mode)
+(map! :after org
+      :map org-mode-map
+      :localleader
+      :desc "Toggle font style" "F" #'mixed-pitch-mode)
+
+(map! :after org
+      :map org-mode-map
+      :localleader
+      :desc "Pretty-mode toggle" "P" #'+org-pretty-mode)
+
+#+end_src
+
+#+begin_src emacs-lisp :tangle no
+;; (map! :leader :desc "toggle font mode" "t v" #'mixed-pitch-mode)
+;; (map! :leader :desc "Toggle emphasis markers" "t e" #'+org-pretty-mode)
+;; (map! :leader :desc "Toggle emphasis headings" "t h" #'org-tree-slide-heading-emphasis-toggle)
+;; (map! :leader :desc "Toggle centered window" "t C" #'centered-window-mode)
 #+end_src
 
 *** Insert heading on same level
