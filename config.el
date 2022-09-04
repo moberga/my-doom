@@ -69,6 +69,8 @@
   '(evil-define-key 'normal dired-mode-map
      (kbd ")") 'dired-omit-mode))
 
+(setq +workspaces-main "#1")
+
 (defun robert/execute-in-shell-and-put-in-buffer (b e)
   "Run current line as shell code and insert/update output."
   (interactive (list (line-beginning-position)
@@ -170,9 +172,6 @@ done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
 
 (define-key evil-insert-state-map (kbd "\C-e") 'evil-copy-from-below)
 
-(map! :leader :desc "Open vterm popup" "o T" #'+vterm/toggle)
-(map! :leader :desc "Open vterm here" "o t" #'+vterm/here)
-
 (global-set-key (kbd "S-<insert>") 'clipboard-yank)
 (define-key evil-visual-state-map (kbd "C-<insert>") 'robert/copy)
 (define-key evil-visual-state-map (kbd "S-<deltechar>") 'clipboard-kill-region)
@@ -213,6 +212,16 @@ done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
  display-time-default-load-average 3)
 
 (remove-hook '+popup-buffer-mode-hook #'+popup-set-modeline-on-enable-h)
+
+(set-popup-rules!
+  '(
+    ("*Async Shell Command*"
+     :side bottom
+     :size 0.30
+     :quit t
+     :select nil)
+    )
+  )
 
 (setq gts-translate-list '(("it" "en")
                            ("en" "it")

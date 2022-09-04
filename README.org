@@ -130,6 +130,12 @@ From [[https://qerub.se/hiding-hidden-files-in-emacs-dired][here]] and [[https:/
      (kbd ")") 'dired-omit-mode))
 #+end_src
 
+*** Workspaces main
+
+#+begin_src emacs-lisp
+(setq +workspaces-main "#1")
+#+end_src
+
 ** Functions
 *** Q to execute line in shell
 
@@ -377,7 +383,7 @@ Aggiunge la scorciatoia per copiare quello che è sotto
 
 *** Switch +vterm/toggle and +vterm/here
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (map! :leader :desc "Open vterm popup" "o T" #'+vterm/toggle)
 (map! :leader :desc "Open vterm here" "o t" #'+vterm/here)
 #+end_src
@@ -496,6 +502,18 @@ Completely disable management of the mode-line in popups:
 
 #+begin_src emacs-lisp
 (remove-hook '+popup-buffer-mode-hook #'+popup-set-modeline-on-enable-h)
+#+end_src
+
+#+begin_src emacs-lisp
+(set-popup-rules!
+  '(
+    ("*Async Shell Command*"
+     :side bottom
+     :size 0.30
+     :quit t
+     :select nil)
+    )
+  )
 #+end_src
 
 * Language
