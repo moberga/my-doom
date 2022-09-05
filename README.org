@@ -130,6 +130,15 @@ From [[https://qerub.se/hiding-hidden-files-in-emacs-dired][here]] and [[https:/
      (kbd ")") 'dired-omit-mode))
 #+end_src
 
+*** Dired trash files
+
+Deleted files are sent to the trash can instead of being deleted
+
+#+begin_src emacs-lisp
+(setq delete-by-moving-to-trash t
+      trash-directory "~/.local/share/Trash/files")
+#+end_src
+
 *** Workspaces main
 
 #+begin_src emacs-lisp
@@ -495,12 +504,12 @@ By default, the mode-line is hidden in popups. To disable this, you can either:
 Change the default :modeline property in +popup-defaults: 
 
 #+begin_src emacs-lisp :tangle no
-;;(plist-put +popup-defaults :modeline t)
+(plist-put +popup-defaults :modeline t)
 #+end_src
 
 Completely disable management of the mode-line in popups: 
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (remove-hook '+popup-buffer-mode-hook #'+popup-set-modeline-on-enable-h)
 #+end_src
 
@@ -630,6 +639,7 @@ occur command was called.
         (+evil/window-move-left) 
         (evil-window-increase-width 28)
         ;; (+popup-mode)
+        (hide-mode-line-mode)
         (+word-wrap-mode)
         (text-scale-adjust -1)
         ;; (rename-buffer (concat "*" buff-name "-Occur*"))

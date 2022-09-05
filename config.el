@@ -69,6 +69,9 @@
   '(evil-define-key 'normal dired-mode-map
      (kbd ")") 'dired-omit-mode))
 
+(setq delete-by-moving-to-trash t
+      trash-directory "~/.local/share/Trash/files")
+
 (setq +workspaces-main "#1")
 
 (defun robert/execute-in-shell-and-put-in-buffer (b e)
@@ -211,8 +214,6 @@ done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
  ;; display-time-day-and-date t
  display-time-default-load-average 3)
 
-(remove-hook '+popup-buffer-mode-hook #'+popup-set-modeline-on-enable-h)
-
 (set-popup-rules!
   '(
     ("*Async Shell Command*"
@@ -283,6 +284,7 @@ done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
         (+evil/window-move-left) 
         (evil-window-increase-width 28)
         ;; (+popup-mode)
+        (hide-mode-line-mode)
         (+word-wrap-mode)
         (text-scale-adjust -1)
         ;; (rename-buffer (concat "*" buff-name "-Occur*"))
