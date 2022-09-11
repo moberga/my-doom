@@ -1,28 +1,6 @@
 #+title: Doom emacs Config
 #+PROPERTY: header-args :tangle config.el :results none
-#+options: toc:2
-
-* Table of Contents :toc:
-- [[#doom-default-configuration][Doom Default configuration]]
-- [[#general-configuration][General configuration]]
-  - [[#variables][Variables]]
-  - [[#functions][Functions]]
-  - [[#keyboard][Keyboard]]
-- [[#visuals][Visuals]]
-  - [[#maximize-frame-and-remove-decorations][Maximize frame and remove decorations]]
-  - [[#customize-splash-screen][Customize splash screen]]
-  - [[#modeline-font-size][Modeline font size]]
-  - [[#show-battery-and-hour][Show battery and hour]]
-  - [[#popups][Popups]]
-- [[#language][Language]]
-  - [[#variables-1][Variables]]
-  - [[#functions-1][Functions]]
-  - [[#keyboard-1][Keyboard]]
-- [[#org][ORG]]
-  - [[#variables-2][Variables]]
-  - [[#functions-2][Functions]]
-  - [[#keyboard-2][Keyboard]]
-  - [[#org-functionality][Org functionality]]
+#+options: toc:1
 
 * Doom Default configuration
 Standard configuration of Doom Emacs
@@ -257,6 +235,48 @@ Dired split window corresponding to current file directory.
 (map! :leader :desc "Explore this dir" "x" #'robert/dired-popup-this-location)
 #+end_src
 
+*** Dired sort function
+
+#+begin_src emacs-lisp
+(defun robert/dired-sort ()
+  (interactive)
+  (if (equal major-mode 'dired-mode)
+  (let (done)
+    (while (not done)
+      (let ((response (read-char-choice
+                       (format "Sort files? [N]ame, [D]ate, [S]ize, [E]xtension, [G]roup directories: ")
+                       '(?n ?d ?s ?e ?g))))
+        (setq done (cond
+                    ((eq response ?n) (setq -arg "-Al --si --time-style long-iso "))
+                    ((eq response ?d) (setq -arg "-Al --si --time-style long-iso -t"))
+                    ((eq response ?s) (setq -arg "-Al --si --time-style long-iso -S"))
+                    ((eq response ?e) (setq -arg "-Al --si --time-style long-iso -X"))
+                    ((eq response ?g) (setq -arg "-Al --si --time-style long-iso --group-directories-first"))
+                    ))))
+    (dired-sort-other done)))
+  (message "Not a dired buffer")
+  )
+#+end_src
+
+#+begin_src emacs-lisp :tangle no
+(defun xah-dired-sort ()
+  "Sort dired dir listing in different ways.
+Prompt for a choice.
+URL `http://ergoemacs.org/emacs/dired_sort.html'
+Version 2015-07-30"
+  (interactive)
+  (let (-sort-by -arg)
+    (setq -sort-by (ido-completing-read "Sort by:" '( "date" "size" "name" "dir")))
+    (cond
+     ((equal -sort-by "name") (setq -arg "-Al --si --time-style long-iso "))
+     ((equal -sort-by "date") (setq -arg "-Al --si --time-style long-iso -t"))
+     ((equal -sort-by "size") (setq -arg "-Al --si --time-style long-iso -S"))
+     ((equal -sort-by "extension") (setq -arg "-Al --si --time-style long-iso -X"))
+     ((equal -sort-by "dir") (setq -arg "-Al --si --time-style long-iso --group-directories-first"))
+     (t (error "logic error 09535" )))
+    (dired-sort-other -arg )))
+#+end_src
+
 *** Epub
 
 #+begin_src emacs-lisp
@@ -485,16 +505,12 @@ The font size is actually fine, the icons are too big.
 
 ** Show battery and hour
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (add-hook 'after-init-hook #'display-battery-mode)
 (add-hook 'after-init-hook #'display-time)
-;; (add-hook 'after-init-hook #'menu-bar-mode)
 (setq 
  display-time-format "%a·%d/%m/%y·%H:%M"
- ;; display-time-24hr-format t
- ;; display-time-day-and-date t
  display-time-default-load-average 3)
-
 #+end_src
 
 ** Popups
@@ -513,7 +529,8 @@ Completely disable management of the mode-line in popups:
 (remove-hook '+popup-buffer-mode-hook #'+popup-set-modeline-on-enable-h)
 #+end_src
 
-#+begin_src emacs-lisp
+???
+#+begin_src emacs-lisp :tangle no
 (set-popup-rules!
   '(
     ("*Async Shell Command*"
@@ -523,6 +540,11 @@ Completely disable management of the mode-line in popups:
      :select nil)
     )
   )
+#+end_src
+
+???
+#+begin_src emacs-lisp :tangle no
+(plist-put +popup-defaults :height 30)
 #+end_src
 
 * Language
@@ -575,7 +597,6 @@ Useful when in variable pitch mode.
 #+end_src
 
 ** Keyboard
-
 *** Flyspell
 Rimuove la scorciatoia di default per la correzione automatica e ne aggiunge un'altra con g.
 
@@ -600,9 +621,37 @@ Rimuove la scorciatoia di default per la correzione automatica e ne aggiunge un'
 *** Org-ellipses
 
 #+begin_src emacs-lisp
-(setq org-ellipses " ^ ")
+(setq org-ellipses "^")
 #+end_src
 
+*** Latex classes
+
+Added extarticle for bigger text
+
+#+begin_src emacs-lisp
+(setq org-latex-classes '(
+    ("beamer" "\\documentclass[presentation]{beamer}"
+        ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}")
+        ("\\subsubsection{%s}" . "\\subsubsection*{%s}")) 
+    ("article" "\\documentclass[11pt]{article}" 
+        ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" .
+        "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}") 
+        ("\\paragraph{%s}" . "\\paragraph*{%s}")
+        ("\\subparagraph{%s}" . "\\subparagraph*{%s}")) 
+    ("extarticle" "\\documentclass[14pt]{article}" 
+        ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" .
+        "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+        ("\\paragraph{%s}" . "\\paragraph*{%s}")
+        ("\\subparagraph{%s}" . "\\subparagraph*{%s}")) 
+    ("report" "\\documentclass[11pt]{report}" 
+        ("\\part{%s}" . "\\part*{%s}") ("\\chapter{%s}" . "\\chapter*{%s}")
+        ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" .
+        "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))
+    ("book" "\\documentclass[11pt]{book}" 
+        ("\\part{%s}" . "\\part*{%s}") ("\\chapter{%s}" . "\\chapter*{%s}") 
+        ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" .
+        "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
+#+end_src
 ** Functions
 *** Occur Buffer for tree view of org mode headers
 
@@ -683,6 +732,7 @@ I have a shell script to create screenshots with =xfce4-screenshooter= to select
 a region and assign a name in a specific path.
 Hours wasted for this thing: 10.
 
+???
 #+begin_src emacs-lisp :tangle no
 (defun get-newest-file-from-dir  (path)
   "Get latest file (including directory) in PATH."
@@ -805,10 +855,10 @@ same directory as the org-buffer and insert a link to this file."
 #+end_src
 
 #+begin_src emacs-lisp :tangle no
-;; (map! :leader :desc "toggle font mode" "t v" #'mixed-pitch-mode)
-;; (map! :leader :desc "Toggle emphasis markers" "t e" #'+org-pretty-mode)
-;; (map! :leader :desc "Toggle emphasis headings" "t h" #'org-tree-slide-heading-emphasis-toggle)
-;; (map! :leader :desc "Toggle centered window" "t C" #'centered-window-mode)
+(map! :leader :desc "toggle font mode" "t v" #'mixed-pitch-mode)
+(map! :leader :desc "Toggle emphasis markers" "t e" #'+org-pretty-mode)
+(map! :leader :desc "Toggle emphasis headings" "t h" #'org-tree-slide-heading-emphasis-toggle)
+(map! :leader :desc "Toggle centered window" "t C" #'centered-window-mode)
 #+end_src
 
 *** Insert heading on same level
@@ -938,12 +988,14 @@ portion
       '(("d" "default"
          entry "* %<%H:%M> %?"
          :target (file+head "%<%Y_%m_%d>.org" "#+title: %<%Y-%m-%d>\n"))))
+#+end_src
 
-;;; IDK
-;; (setq org-roam-dailies-capture-templates
-;;       '(("d" "default"
-;;          entry "* %<%H:%M> %?"
-;;          :target (file+head "%<%Y_%m_%d>.org" "#+title: %<%Y-%m-%d>\n"))))
+???
+#+begin_src emacs-lisp :tangle no
+(setq org-roam-dailies-capture-templates
+      '(("d" "default"
+         entry "* %<%H:%M> %?"
+         :target (file+head "%<%Y_%m_%d>.org" "#+title: %<%Y-%m-%d>\n"))))
 #+end_src
 
 **** Keyboard
@@ -964,14 +1016,14 @@ portion
 
 ??? Don't remember
 #+begin_src emacs-lisp :tangle no
-;; (defun robert/org-roam-filter-by-tag (tag-name)
-;;   (lambda (node)
-;;     member tag-name (org-roam-node-tags node)))
+(defun robert/org-roam-filter-by-tag (tag-name)
+  (lambda (node)
+    member tag-name (org-roam-node-tags node)))
 
-;; (defun robert/org-roam-list-notes-by-tag (tag-name)
-;;   (mapcar #'org-roam-node-file
-;;           (seq-filter
-;;            (robert/org-roam-filter-by-tag name)
-;;            (org-roam-node-list))))
+(defun robert/org-roam-list-notes-by-tag (tag-name)
+  (mapcar #'org-roam-node-file
+          (seq-filter
+           (robert/org-roam-filter-by-tag name)
+           (org-roam-node-list))))
 #+end_src
 

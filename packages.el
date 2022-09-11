@@ -61,3 +61,6 @@
 (package! dwim-shell-command)
 
 (package! rainbow-mode)
+
+(package! org-mime)
+

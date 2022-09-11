@@ -205,25 +205,6 @@ done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
 
 (setq all-the-icons-scale-factor 1.0)
 
-(add-hook 'after-init-hook #'display-battery-mode)
-(add-hook 'after-init-hook #'display-time)
-;; (add-hook 'after-init-hook #'menu-bar-mode)
-(setq 
- display-time-format "%a·%d/%m/%y·%H:%M"
- ;; display-time-24hr-format t
- ;; display-time-day-and-date t
- display-time-default-load-average 3)
-
-(set-popup-rules!
-  '(
-    ("*Async Shell Command*"
-     :side bottom
-     :size 0.30
-     :quit t
-     :select nil)
-    )
-  )
-
 (setq gts-translate-list '(("it" "en")
                            ("en" "it")
                            ("it" "es")
@@ -262,7 +243,7 @@ done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
 (add-hook 'org-mode-hook '(lambda () (text-scale-increase +1)))
 (add-hook 'org-mode-hook '(lambda () (modify-syntax-entry ?\' " ")))
 
-(setq org-ellipses " ^ ")
+(setq org-ellipses "^")
 
 (defun occur-mode-clean-buffer ()
   "Removes all commentary from the *Occur* buffer, leaving the
@@ -471,12 +452,6 @@ done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
       '(("d" "default"
          entry "* %<%H:%M> %?"
          :target (file+head "%<%Y_%m_%d>.org" "#+title: %<%Y-%m-%d>\n"))))
-
-;;; IDK
-;; (setq org-roam-dailies-capture-templates
-;;       '(("d" "default"
-;;          entry "* %<%H:%M> %?"
-;;          :target (file+head "%<%Y_%m_%d>.org" "#+title: %<%Y-%m-%d>\n"))))
 
 (defun org-roam-node-insert-immediate (arg &rest args)
   (interactive "P")
