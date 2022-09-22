@@ -63,15 +63,6 @@
 
 (set-file-template! "/__\\.py$g" :trigger "__" :mode 'python-mode)
 
-(setq dired-omit-files "^\\...+$")
-
-(eval-after-load 'dired
-  '(evil-define-key 'normal dired-mode-map
-     (kbd ")") 'dired-omit-mode))
-
-(setq delete-by-moving-to-trash t
-      trash-directory "~/.local/share/Trash/files")
-
 (setq +workspaces-main "#1")
 
 (defun robert/execute-in-shell-and-put-in-buffer (b e)
@@ -116,53 +107,7 @@
 (map! :leader :desc "Kill buffer" "b k" #'robert/kill-current-buffer)
 (map! :leader :desc "Kill buffer" "b d" #'kill-buffer-and-window)
 
-(defun open-file-externally ()
-  "Open the current file's directory in external file browser."
-  (interactive)
-  (if (equal major-mode 'dired-mode)
-      (consult-file-externally (dired-get-filename))
-      (browse-url (expand-file-name default-directory))))
-
-(map! :leader :desc "Browse or open externally" "o x" #'open-file-externally)
-
-;; (remove-hook! 'dired-mode-hook #'dired-omit-mode)
-
-(defun robert/dired-popup-this-location ()
-  "Open popup dired buffer of current file"
-  (interactive)
-  (dired-other-window default-directory))
-
-(map! :leader :desc "Explore this dir" "x" #'robert/dired-popup-this-location)
-
 (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
-
-(use-package dwim-shell-command
-  :commands (dwim-shell-command dwim-shell-command-on-marked-files))
-
-(defun robert/dwim-shell-command-add-pages-to-pdf ()
-  "Add the page numbers to a pdf file"
-  (interactive)
-  (dwim-shell-command-on-marked-files
-  "Add the page numbers to a pdf file"
-"
-enscript --fancy-header=footer --header-font='Times-Roman11' \
--L1 --header='' --footer='|$%|' -o- < <(for i in $(seq 1 400); do echo; \
-done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
-"
-   :utils '("enscript" "pdftk" "ps2pdf" "seq")
-   :extensions "pdf"))
-
-(defun robert/dwim-shell-command-mark-pdf-with-file-name ()
-  "Add pdf name in header of file"
-  (interactive)
-  (let ((filename (file-name-base (dired-get-filename))))
-    (dwim-shell-command-on-marked-files
-     "Add pdf name in header of file"
-     (format " enscript --fancy-header=footer --header-font='Times-Roman11' -L1 --header=''%s'||' --footer='' -o- < <(for i in $(seq 1 400); do echo; done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_marked.pdf'" 
-             filename)))
-  :utils '("enscript" "pdftk" "ps2pdf" "seq")
-  :extensions "pdf"
-  :silent-success)
 
 (map! :leader "SPC" nil)
 
@@ -244,6 +189,29 @@ done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
 (add-hook 'org-mode-hook '(lambda () (modify-syntax-entry ?\' " ")))
 
 (setq org-ellipses "^")
+
+(setq org-latex-classes '(
+    ("beamer" "\\documentclass[presentation]{beamer}"
+        ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}")
+        ("\\subsubsection{%s}" . "\\subsubsection*{%s}")) 
+    ("article" "\\documentclass[11pt]{article}" 
+        ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" .
+        "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}") 
+        ("\\paragraph{%s}" . "\\paragraph*{%s}")
+        ("\\subparagraph{%s}" . "\\subparagraph*{%s}")) 
+    ("extarticle" "\\documentclass[14pt]{article}" 
+        ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" .
+        "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+        ("\\paragraph{%s}" . "\\paragraph*{%s}")
+        ("\\subparagraph{%s}" . "\\subparagraph*{%s}")) 
+    ("report" "\\documentclass[11pt]{report}" 
+        ("\\part{%s}" . "\\part*{%s}") ("\\chapter{%s}" . "\\chapter*{%s}")
+        ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" .
+        "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))
+    ("book" "\\documentclass[11pt]{book}" 
+        ("\\part{%s}" . "\\part*{%s}") ("\\chapter{%s}" . "\\chapter*{%s}") 
+        ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" .
+        "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
 
 (defun occur-mode-clean-buffer ()
   "Removes all commentary from the *Occur* buffer, leaving the
@@ -464,3 +432,79 @@ done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
 (define-key evil-insert-state-map (kbd "C-M-n") 'org-roam-node-insert-immediate)
 
 (map! :leader :desc "Node insert" "n r I" #'org-roam-node-insert)
+
+(setq delete-by-moving-to-trash t
+      trash-directory "~/.local/share/Trash/files")
+
+(defun robert/dired-popup-this-location ()
+  "Open popup dired buffer of current file"
+  (interactive)
+  (dired-other-window default-directory))
+
+(map! :leader :desc "Explore this dir" "x" #'robert/dired-popup-this-location)
+
+(defun robert/dired-sort ()
+  (interactive)
+  (if (equal major-mode 'dired-mode)
+  (let (done)
+    (while (not done)
+      (let ((response (read-char-choice
+                       (format "Sort files? [N]ame, [D]ate, [S]ize, [E]xtension, [G]roup directories: ")
+                       '(?n ?d ?s ?e ?g))))
+        (setq done (cond
+                    ((eq response ?n) (setq -arg "-Al --si --time-style long-iso "))
+                    ((eq response ?d) (setq -arg "-Al --si --time-style long-iso -t"))
+                    ((eq response ?s) (setq -arg "-Al --si --time-style long-iso -S"))
+                    ((eq response ?e) (setq -arg "-Al --si --time-style long-iso -X"))
+                    ((eq response ?g) (setq -arg "-Al --si --time-style long-iso --group-directories-first"))
+                    ))))
+    (dired-sort-other done)))
+  (message "Not a dired buffer")
+  )
+
+(defun robert/open-file-externally ()
+  "Open the current file's directory in external file browser."
+  (interactive)
+  (if (equal major-mode 'dired-mode)
+      (consult-file-externally (dired-get-filename))
+      (browse-url (expand-file-name default-directory))))
+
+(map! :leader :desc "Browse or open externally" "o x" #'robert/open-file-externally)
+
+(use-package dwim-shell-command
+  :commands (dwim-shell-command dwim-shell-command-on-marked-files))
+
+(defun robert/dwim-shell-command-add-pages-to-pdf ()
+  "Add the page numbers to a pdf file"
+  (interactive)
+  (dwim-shell-command-on-marked-files
+  "Add the page numbers to a pdf file"
+"
+enscript --fancy-header=footer --header-font='Times-Roman11' \
+-L1 --header='' --footer='|$%|' -o- < <(for i in $(seq 1 400); do echo; \
+done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
+"
+   :utils '("enscript" "pdftk" "ps2pdf" "seq")
+   :extensions "pdf"))
+
+(defun robert/dwim-shell-command-mark-pdf-with-file-name ()
+  "Add pdf name in header of file"
+  (interactive)
+  (let ((filename (file-name-base (dired-get-filename))))
+    (dwim-shell-command-on-marked-files
+     "Add pdf name in header of file"
+     (format " enscript --fancy-header=footer --header-font='Times-Roman11' -L1 --header=''%s'||' --footer='' -o- < <(for i in $(seq 1 400); do echo; done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_marked.pdf'" 
+             filename)))
+  :utils '("enscript" "pdftk" "ps2pdf" "seq")
+  :extensions "pdf"
+  :silent-success)
+
+(setq dired-omit-files "^\\...+$")
+
+(eval-after-load 'dired
+  '(evil-define-key 'normal dired-mode-map
+     (kbd ")") 'dired-omit-mode))
+
+(eval-after-load 'dired
+  '(evil-define-key 'normal dired-mode-map
+     (kbd "o") 'robert/dired-sort))

@@ -96,27 +96,6 @@ When executing macros they stop at the end of the file.
 (set-file-template! "/__\\.py$g" :trigger "__" :mode 'python-mode)
 #+end_src
 
-*** Dired hide hidden files
-
-From [[https://qerub.se/hiding-hidden-files-in-emacs-dired][here]] and [[https://stackoverflow.com/questions/31363541/how-to-map-emacs-evil-keys-to-dired-plus][here]].
-
-#+begin_src emacs-lisp 
-(setq dired-omit-files "^\\...+$")
-
-(eval-after-load 'dired
-  '(evil-define-key 'normal dired-mode-map
-     (kbd ")") 'dired-omit-mode))
-#+end_src
-
-*** Dired trash files
-
-Deleted files are sent to the trash can instead of being deleted
-
-#+begin_src emacs-lisp
-(setq delete-by-moving-to-trash t
-      trash-directory "~/.local/share/Trash/files")
-#+end_src
-
 *** Workspaces main
 
 #+begin_src emacs-lisp
@@ -204,178 +183,11 @@ From [[https://emacs.stackexchange.com/questions/3245/kill-buffer-prompt-with-op
 ;; (advice-add 'kill-buffer :around #'robert/kill-buffer)
 #+end_src
 
-*** Open externally
-
-Open file at point externally when in =dired-mode= (really useful for pdf files) or browse
-the default directory of the currently open file in any other mode.
-
-#+begin_src emacs-lisp
-(defun open-file-externally ()
-  "Open the current file's directory in external file browser."
-  (interactive)
-  (if (equal major-mode 'dired-mode)
-      (consult-file-externally (dired-get-filename))
-      (browse-url (expand-file-name default-directory))))
-
-(map! :leader :desc "Browse or open externally" "o x" #'open-file-externally)
-
-;; (remove-hook! 'dired-mode-hook #'dired-omit-mode)
-#+end_src
-
-*** Dired split
-
-Dired split window corresponding to current file directory.
-
-#+begin_src emacs-lisp
-(defun robert/dired-popup-this-location ()
-  "Open popup dired buffer of current file"
-  (interactive)
-  (dired-other-window default-directory))
-
-(map! :leader :desc "Explore this dir" "x" #'robert/dired-popup-this-location)
-#+end_src
-
-*** Dired sort function
-
-#+begin_src emacs-lisp
-(defun robert/dired-sort ()
-  (interactive)
-  (if (equal major-mode 'dired-mode)
-  (let (done)
-    (while (not done)
-      (let ((response (read-char-choice
-                       (format "Sort files? [N]ame, [D]ate, [S]ize, [E]xtension, [G]roup directories: ")
-                       '(?n ?d ?s ?e ?g))))
-        (setq done (cond
-                    ((eq response ?n) (setq -arg "-Al --si --time-style long-iso "))
-                    ((eq response ?d) (setq -arg "-Al --si --time-style long-iso -t"))
-                    ((eq response ?s) (setq -arg "-Al --si --time-style long-iso -S"))
-                    ((eq response ?e) (setq -arg "-Al --si --time-style long-iso -X"))
-                    ((eq response ?g) (setq -arg "-Al --si --time-style long-iso --group-directories-first"))
-                    ))))
-    (dired-sort-other done)))
-  (message "Not a dired buffer")
-  )
-#+end_src
-
-#+begin_src emacs-lisp :tangle no
-(defun xah-dired-sort ()
-  "Sort dired dir listing in different ways.
-Prompt for a choice.
-URL `http://ergoemacs.org/emacs/dired_sort.html'
-Version 2015-07-30"
-  (interactive)
-  (let (-sort-by -arg)
-    (setq -sort-by (ido-completing-read "Sort by:" '( "date" "size" "name" "dir")))
-    (cond
-     ((equal -sort-by "name") (setq -arg "-Al --si --time-style long-iso "))
-     ((equal -sort-by "date") (setq -arg "-Al --si --time-style long-iso -t"))
-     ((equal -sort-by "size") (setq -arg "-Al --si --time-style long-iso -S"))
-     ((equal -sort-by "extension") (setq -arg "-Al --si --time-style long-iso -X"))
-     ((equal -sort-by "dir") (setq -arg "-Al --si --time-style long-iso --group-directories-first"))
-     (t (error "logic error 09535" )))
-    (dired-sort-other -arg )))
-#+end_src
-
 *** Epub
 
 #+begin_src emacs-lisp
 (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
 #+end_src
-
-*** Dwim functions
-
-Function that adds numbers to a pdf file using enscript. This is from the [[https://www.dry-lab.org/blog/2018/numbering-pages-of-a-pdf][dry-lab]] blog.
-Enscript has a long lasting +bug+ feature that doesn't allow to print footers. But there's a solution:
-I just need to add a =footer.hdr= file in =/usr/share/enscript/= or =~/.enscript/=. Link [[https://askubuntu.com/a/544620][here]].
-
-
-#+begin_src emacs-lisp
-(use-package dwim-shell-command
-  :commands (dwim-shell-command dwim-shell-command-on-marked-files))
-#+end_src
-
-#+begin_src emacs-lisp
-(defun robert/dwim-shell-command-add-pages-to-pdf ()
-  "Add the page numbers to a pdf file"
-  (interactive)
-  (dwim-shell-command-on-marked-files
-  "Add the page numbers to a pdf file"
-"
-enscript --fancy-header=footer --header-font='Times-Roman11' \
--L1 --header='' --footer='|$%|' -o- < <(for i in $(seq 1 400); do echo; \
-done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
-"
-   :utils '("enscript" "pdftk" "ps2pdf" "seq")
-   :extensions "pdf"))
-#+end_src
-
-#+begin_src emacs-lisp
-(defun robert/dwim-shell-command-mark-pdf-with-file-name ()
-  "Add pdf name in header of file"
-  (interactive)
-  (let ((filename (file-name-base (dired-get-filename))))
-    (dwim-shell-command-on-marked-files
-     "Add pdf name in header of file"
-     (format " enscript --fancy-header=footer --header-font='Times-Roman11' -L1 --header=''%s'||' --footer='' -o- < <(for i in $(seq 1 400); do echo; done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_marked.pdf'" 
-             filename)))
-  :utils '("enscript" "pdftk" "ps2pdf" "seq")
-  :extensions "pdf"
-  :silent-success)
-
-#+end_src
-
-#+end_src
-:footer_contents:
-#+begin_src
-% -- code follows this line --
-%Format: fmodstr    $D{%a %b %d %H:%M:%S %Y}
-%Format: pagenumstr $V$%
-
-%HeaderHeight: 38
-%FooterHeight: 15
-
-/do_header {   % print default simple header
-
-  % Footer
-  gsave
-    d_footer_x d_footer_y HFpt_h 3 div add translate
-    HF setfont
-
-    user_footer_p {
-      d_footer_x  d_footer_y moveto user_footer_left_str show
-
-      d_footer_w user_footer_center_str stringwidth pop sub 2 div
-      0 moveto user_footer_center_str show
-
-      d_footer_x d_footer_w add user_footer_right_str stringwidth pop sub
-      d_footer_y moveto user_footer_right_str show
-    } if
-  grestore
-
-  % Header
-  gsave
-    d_header_x d_header_y HFpt_h 3 div add translate
-    HF setfont
-
-    user_header_p {
-      5 0 moveto user_header_left_str show
-
-      d_header_w user_header_center_str stringwidth pop sub 2 div
-      0 moveto user_header_center_str show
-
-      d_header_w user_header_right_str stringwidth pop sub 5 sub
-      0 moveto user_header_right_str show
-    } {
-      5 0 moveto fname show
-      45 0 rmoveto fmodstr show
-      45 0 rmoveto pagenumstr show
-    } ifelse
-  grestore
-
-} def
-#+end_src
-:end:
 
 ** Keyboard 
 *** Remove SPC-SPC shortcut
@@ -652,6 +464,7 @@ Added extarticle for bigger text
         ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" .
         "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
 #+end_src
+
 ** Functions
 *** Occur Buffer for tree view of org mode headers
 
@@ -1027,3 +840,203 @@ portion
            (org-roam-node-list))))
 #+end_src
 
+* Dired
+
+** Variables
+*** Dired trash files
+
+Deleted files are sent to the trash can instead of being deleted
+
+#+begin_src emacs-lisp
+(setq delete-by-moving-to-trash t
+      trash-directory "~/.local/share/Trash/files")
+#+end_src
+
+** Functions
+*** Dired split
+
+Dired split window corresponding to current file directory.
+
+#+begin_src emacs-lisp
+(defun robert/dired-popup-this-location ()
+  "Open popup dired buffer of current file"
+  (interactive)
+  (dired-other-window default-directory))
+
+(map! :leader :desc "Explore this dir" "x" #'robert/dired-popup-this-location)
+#+end_src
+
+*** Dired sort function
+
+#+begin_src emacs-lisp
+(defun robert/dired-sort ()
+  (interactive)
+  (if (equal major-mode 'dired-mode)
+  (let (done)
+    (while (not done)
+      (let ((response (read-char-choice
+                       (format "Sort files? [N]ame, [D]ate, [S]ize, [E]xtension, [G]roup directories: ")
+                       '(?n ?d ?s ?e ?g))))
+        (setq done (cond
+                    ((eq response ?n) (setq -arg "-Al --si --time-style long-iso "))
+                    ((eq response ?d) (setq -arg "-Al --si --time-style long-iso -t"))
+                    ((eq response ?s) (setq -arg "-Al --si --time-style long-iso -S"))
+                    ((eq response ?e) (setq -arg "-Al --si --time-style long-iso -X"))
+                    ((eq response ?g) (setq -arg "-Al --si --time-style long-iso --group-directories-first"))
+                    ))))
+    (dired-sort-other done)))
+  (message "Not a dired buffer")
+  )
+#+end_src
+
+#+begin_src emacs-lisp :tangle no
+(defun xah-dired-sort ()
+  "Sort dired dir listing in different ways.
+Prompt for a choice.
+URL `http://ergoemacs.org/emacs/dired_sort.html'
+Version 2015-07-30"
+  (interactive)
+  (let (-sort-by -arg)
+    (setq -sort-by (ido-completing-read "Sort by:" '( "date" "size" "name" "dir")))
+    (cond
+     ((equal -sort-by "name") (setq -arg "-Al --si --time-style long-iso "))
+     ((equal -sort-by "date") (setq -arg "-Al --si --time-style long-iso -t"))
+     ((equal -sort-by "size") (setq -arg "-Al --si --time-style long-iso -S"))
+     ((equal -sort-by "extension") (setq -arg "-Al --si --time-style long-iso -X"))
+     ((equal -sort-by "dir") (setq -arg "-Al --si --time-style long-iso --group-directories-first"))
+     (t (error "logic error 09535" )))
+    (dired-sort-other -arg )))
+#+end_src
+
+*** Open externally
+
+Open file at point externally when in =dired-mode= (really useful for pdf files) or browse
+the default directory of the currently open file in any other mode.
+
+#+begin_src emacs-lisp 
+(defun robert/open-file-externally ()
+  "Open the current file's directory in external file browser."
+  (interactive)
+  (if (equal major-mode 'dired-mode)
+      (consult-file-externally (dired-get-filename))
+      (browse-url (expand-file-name default-directory))))
+#+end_src
+
+#+begin_src emacs-lisp
+(map! :leader :desc "Browse or open externally" "o x" #'robert/open-file-externally)
+#+end_src
+
+*** Dwim functions
+
+Function that adds numbers to a pdf file using enscript. This is from the [[https://www.dry-lab.org/blog/2018/numbering-pages-of-a-pdf][dry-lab]] blog.
+Enscript has a long lasting +bug+ feature that doesn't allow to print footers. But there's a solution:
+I just need to add a =footer.hdr= file in =/usr/share/enscript/= or =~/.enscript/=. Link [[https://askubuntu.com/a/544620][here]].
+
+
+#+begin_src emacs-lisp
+(use-package dwim-shell-command
+  :commands (dwim-shell-command dwim-shell-command-on-marked-files))
+#+end_src
+
+#+begin_src emacs-lisp
+(defun robert/dwim-shell-command-add-pages-to-pdf ()
+  "Add the page numbers to a pdf file"
+  (interactive)
+  (dwim-shell-command-on-marked-files
+  "Add the page numbers to a pdf file"
+"
+enscript --fancy-header=footer --header-font='Times-Roman11' \
+-L1 --header='' --footer='|$%|' -o- < <(for i in $(seq 1 400); do echo; \
+done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
+"
+   :utils '("enscript" "pdftk" "ps2pdf" "seq")
+   :extensions "pdf"))
+#+end_src
+
+#+begin_src emacs-lisp
+(defun robert/dwim-shell-command-mark-pdf-with-file-name ()
+  "Add pdf name in header of file"
+  (interactive)
+  (let ((filename (file-name-base (dired-get-filename))))
+    (dwim-shell-command-on-marked-files
+     "Add pdf name in header of file"
+     (format " enscript --fancy-header=footer --header-font='Times-Roman11' -L1 --header=''%s'||' --footer='' -o- < <(for i in $(seq 1 400); do echo; done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_marked.pdf'" 
+             filename)))
+  :utils '("enscript" "pdftk" "ps2pdf" "seq")
+  :extensions "pdf"
+  :silent-success)
+
+#+end_src
+
+#+end_src
+:footer_contents:
+#+begin_src
+% -- code follows this line --
+%Format: fmodstr    $D{%a %b %d %H:%M:%S %Y}
+%Format: pagenumstr $V$%
+
+%HeaderHeight: 38
+%FooterHeight: 15
+
+/do_header {   % print default simple header
+
+  % Footer
+  gsave
+    d_footer_x d_footer_y HFpt_h 3 div add translate
+    HF setfont
+
+    user_footer_p {
+      d_footer_x  d_footer_y moveto user_footer_left_str show
+
+      d_footer_w user_footer_center_str stringwidth pop sub 2 div
+      0 moveto user_footer_center_str show
+
+      d_footer_x d_footer_w add user_footer_right_str stringwidth pop sub
+      d_footer_y moveto user_footer_right_str show
+    } if
+  grestore
+
+  % Header
+  gsave
+    d_header_x d_header_y HFpt_h 3 div add translate
+    HF setfont
+
+    user_header_p {
+      5 0 moveto user_header_left_str show
+
+      d_header_w user_header_center_str stringwidth pop sub 2 div
+      0 moveto user_header_center_str show
+
+      d_header_w user_header_right_str stringwidth pop sub 5 sub
+      0 moveto user_header_right_str show
+    } {
+      5 0 moveto fname show
+      45 0 rmoveto fmodstr show
+      45 0 rmoveto pagenumstr show
+    } ifelse
+  grestore
+
+} def
+#+end_src
+:end:
+
+** Keyboard
+*** Dired hide hidden files
+
+From [[https://qerub.se/hiding-hidden-files-in-emacs-dired][here]] and [[https://stackoverflow.com/questions/31363541/how-to-map-emacs-evil-keys-to-dired-plus][here]].
+
+#+begin_src emacs-lisp 
+(setq dired-omit-files "^\\...+$")
+
+(eval-after-load 'dired
+  '(evil-define-key 'normal dired-mode-map
+     (kbd ")") 'dired-omit-mode))
+#+end_src
+
+*** Re-order files
+
+#+begin_src emacs-lisp
+(eval-after-load 'dired
+  '(evil-define-key 'normal dired-mode-map
+     (kbd "o") 'robert/dired-sort))
+#+end_src
