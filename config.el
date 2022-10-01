@@ -150,6 +150,8 @@
 
 (setq all-the-icons-scale-factor 1.0)
 
+(plist-put +popup-defaults :modeline t)
+
 (setq gts-translate-list '(("it" "en")
                            ("en" "it")
                            ("it" "es")
@@ -432,6 +434,21 @@
 (define-key evil-insert-state-map (kbd "C-M-n") 'org-roam-node-insert-immediate)
 
 (map! :leader :desc "Node insert" "n r I" #'org-roam-node-insert)
+
+(use-package! websocket
+    :after org-roam)
+
+(use-package! org-roam-ui
+    :after org-roam ;; or :after org
+;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
+;;         a hookable mode anymore, you're advised to pick something yourself
+;;         if you don't care about startup time, use
+;;  :hook (after-init . org-roam-ui-mode)
+    :config
+    (setq org-roam-ui-sync-theme t
+          org-roam-ui-follow t
+          org-roam-ui-update-on-save t
+          org-roam-ui-open-on-start t))
 
 (setq delete-by-moving-to-trash t
       trash-directory "~/.local/share/Trash/files")

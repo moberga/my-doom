@@ -2,6 +2,32 @@
 #+PROPERTY: header-args :tangle config.el :results none
 #+options: toc:1
 
+* TOC :toc:
+- [[#doom-default-configuration][Doom Default configuration]]
+- [[#general-configuration][General configuration]]
+  - [[#variables][Variables]]
+  - [[#functions][Functions]]
+  - [[#keyboard][Keyboard]]
+- [[#visuals][Visuals]]
+  - [[#maximize-frame-and-remove-decorations][Maximize frame and remove decorations]]
+  - [[#customize-splash-screen][Customize splash screen]]
+  - [[#modeline-font-size][Modeline font size]]
+  - [[#show-battery-and-hour][Show battery and hour]]
+  - [[#popups][Popups]]
+- [[#language][Language]]
+  - [[#variables-1][Variables]]
+  - [[#functions-1][Functions]]
+  - [[#keyboard-1][Keyboard]]
+- [[#org][ORG]]
+  - [[#variables-2][Variables]]
+  - [[#functions-2][Functions]]
+  - [[#keyboard-2][Keyboard]]
+  - [[#org-functionality][Org functionality]]
+- [[#dired][Dired]]
+  - [[#variables-3][Variables]]
+  - [[#functions-3][Functions]]
+  - [[#keyboard-3][Keyboard]]
+
 * Doom Default configuration
 Standard configuration of Doom Emacs
 
@@ -331,7 +357,7 @@ From [[https://docs.doomemacs.org/latest/modules/ui/popup/][here]].
 By default, the mode-line is hidden in popups. To disable this, you can either:
 Change the default :modeline property in +popup-defaults: 
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 (plist-put +popup-defaults :modeline t)
 #+end_src
 
@@ -583,7 +609,6 @@ Hours wasted for this thing: 10.
                        "_media/" 
                        (file-name-nondirectory outfile)) 
                       "]]"))))
-  (newline)
   (newline))
 
 (defun insert-org-image--time-independent ()
@@ -604,7 +629,6 @@ Hours wasted for this thing: 10.
                      "_media/" 
                      (file-name-nondirectory outfile)) 
                     "]]")))
-  (newline)
   (newline))
 
 (map! :after org
@@ -777,8 +801,6 @@ portion
       org-journal-time-prefix "* "
       org-journal-date-format "%A, %Y_%m_%d"
       org-journal-file-format "%Y_%m_%d.org")
-
-(map! :leader :desc "Org-J new entry" "J" #'org-journal-new-entry)
 #+end_src
 
 *** Org-roam
@@ -839,9 +861,26 @@ portion
            (robert/org-roam-filter-by-tag name)
            (org-roam-node-list))))
 #+end_src
+*** Org roam ui
+
+#+begin_src emacs-lisp
+(use-package! websocket
+    :after org-roam)
+
+(use-package! org-roam-ui
+    :after org-roam ;; or :after org
+;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
+;;         a hookable mode anymore, you're advised to pick something yourself
+;;         if you don't care about startup time, use
+;;  :hook (after-init . org-roam-ui-mode)
+    :config
+    (setq org-roam-ui-sync-theme t
+          org-roam-ui-follow t
+          org-roam-ui-update-on-save t
+          org-roam-ui-open-on-start t))
+#+end_src
 
 * Dired
-
 ** Variables
 *** Dired trash files
 
