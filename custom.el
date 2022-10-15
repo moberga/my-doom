@@ -22,7 +22,8 @@
      ("normalem" "ulem" t nil)
      ("" "amsmath" t nil)
      ("" "amssymb" t nil)
-     ("" "capt-of" nil nil))))
+     ("" "capt-of" nil nil)))
+ '(vertico-count 12))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

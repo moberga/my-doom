@@ -62,7 +62,7 @@
 
 (package! rainbow-mode)
 
-(package! org-mime)
-
 (unpin! org-roam)
 (package! org-roam-ui)
+
+(package! scihub :recipe (:host github :repo "emacs-pe/scihub.el"))

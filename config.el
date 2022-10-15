@@ -150,7 +150,7 @@
 
 (setq all-the-icons-scale-factor 1.0)
 
-(plist-put +popup-defaults :modeline t)
+(remove-hook '+popup-buffer-mode-hook #'+popup-set-modeline-on-enable-h)
 
 (setq gts-translate-list '(("it" "en")
                            ("en" "it")
@@ -169,7 +169,7 @@
 (add-hook 'company-mode-hook 'company-box-mode)
 
 (after! ispell
-  (ispell-change-dictionary "italian"))
+  (ispell-change-dictionary "italian" "Global"))
 
 (defun fd-switch-dictionary()
  (interactive)
@@ -285,7 +285,6 @@
                        "_media/" 
                        (file-name-nondirectory outfile)) 
                       "]]"))))
-  (newline)
   (newline))
 
 (defun insert-org-image--time-independent ()
@@ -306,7 +305,6 @@
                      "_media/" 
                      (file-name-nondirectory outfile)) 
                     "]]")))
-  (newline)
   (newline))
 
 (map! :after org
@@ -326,11 +324,6 @@
       :map org-mode-map
       :localleader
       :desc "Toggle font style" "F" #'mixed-pitch-mode)
-
-(map! :after org
-      :map org-mode-map
-      :localleader
-      :desc "Pretty-mode toggle" "P" #'+org-pretty-mode)
 
 (with-eval-after-load "org"
   (define-key org-mode-map (kbd "<C-M-return>") #'org-insert-heading))
@@ -405,16 +398,14 @@
       org-journal-date-format "%A, %Y_%m_%d"
       org-journal-file-format "%Y_%m_%d.org")
 
-(map! :leader :desc "Org-J new entry" "J" #'org-journal-new-entry)
-
 (setq org-roam-directory "~/Documenti/emacs/org/roam")
 
 (setq org-roam-capture-templates
       '(("d" "default"
          plain "%?"
-         :if-new (file+head "${slug}_%<%Y_%m_%d_%H%m%s>.org" "#+title: ${title}
-#+filetags:
+         :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}
 #+category: ${title}
+#+filetags:
 #+date: %U\n")
          :unnarrowed t)))
 
@@ -422,6 +413,28 @@
       '(("d" "default"
          entry "* %<%H:%M> %?"
          :target (file+head "%<%Y_%m_%d>.org" "#+title: %<%Y-%m-%d>\n"))))
+
+(after! org-roam
+  (setq org-roam-node-display-template 
+        (format "${doom-hierarchy:*} %s %s"
+                (propertize "${doom-tags:78}" 'face 'org-tag) 
+                (propertize "${doom-type:10}" 'face 'font-lock-keyword-face))))
+
+(defun robert/org-roam-preview-function ()
+  "Same as `org-roam-preview-default-function', but replaces org-roam links to literal-ish form."
+  (let ((beg (save-excursion
+               (org-roam-end-of-meta-data t)
+               (point)))
+        (end (save-excursion
+               (org-next-visible-heading 1)
+               (point))))
+     (s-replace-regexp "\\[id:\\([a-z0-9]\\)\\{8\\}-\\([a-z0-9]\\)\\{4\\}-\\([a-z0-9]\\)\\{4\\}-\\([a-z0-9]\\)\\{4\\}-\\([a-z0-9]\\)\\{12\\}\\]"
+                       ""
+                       (string-trim (buffer-substring-no-properties beg end)))
+))
+
+(after! org-roam
+  (setq org-roam-preview-function 'robert/org-roam-preview-function))
 
 (defun org-roam-node-insert-immediate (arg &rest args)
   (interactive "P")
@@ -431,7 +444,7 @@
     (apply #'org-roam-node-insert args)))
 
 (map! :leader :desc "Node insert immediate" "n r i" #'org-roam-node-insert-immediate)
-(define-key evil-insert-state-map (kbd "C-M-n") 'org-roam-node-insert-immediate)
+;; (define-key evil-insert-state-map (kbd "C-M-n") 'org-roam-node-insert-immediate)
 
 (map! :leader :desc "Node insert" "n r I" #'org-roam-node-insert)
 
@@ -525,3 +538,19 @@ done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
 (eval-after-load 'dired
   '(evil-define-key 'normal dired-mode-map
      (kbd "o") 'robert/dired-sort))
+
+(use-package! scihub
+ :init
+ (setq scihub-download-directory "~/Documenti/papers/"
+       scihub-open-after-download t
+       scihub-fetch-domain 'scihub-fetch-domains-lovescihub))
+
+(defun robert/open-pdf-zathura ()
+  (interactive)
+  (async-shell-command 
+   (concat "zathura --page=" (pdf-view-current-pagelabel) " " (buffer-file-name))))
+
+(map! :after pdf-tools
+      :map pdf-view-mode-map
+      :localleader
+      :desc "Open pdf in zathura" "m" #'robert/open-pdf-zathura)

@@ -27,6 +27,9 @@
   - [[#variables-3][Variables]]
   - [[#functions-3][Functions]]
   - [[#keyboard-3][Keyboard]]
+- [[#pdf][PDF]]
+  - [[#sci-hub][Sci-hub]]
+  - [[#open-in-zathura][Open in Zathura]]
 
 * Doom Default configuration
 Standard configuration of Doom Emacs
@@ -357,13 +360,13 @@ From [[https://docs.doomemacs.org/latest/modules/ui/popup/][here]].
 By default, the mode-line is hidden in popups. To disable this, you can either:
 Change the default :modeline property in +popup-defaults: 
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (plist-put +popup-defaults :modeline t)
 #+end_src
 
 Completely disable management of the mode-line in popups: 
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp 
 (remove-hook '+popup-buffer-mode-hook #'+popup-set-modeline-on-enable-h)
 #+end_src
 
@@ -422,7 +425,7 @@ Useful when in variable pitch mode.
 
 #+begin_src emacs-lisp
 (after! ispell
-  (ispell-change-dictionary "italian"))
+  (ispell-change-dictionary "italian" "Global"))
 
 (defun fd-switch-dictionary()
  (interactive)
@@ -683,12 +686,6 @@ same directory as the org-buffer and insert a link to this file."
       :map org-mode-map
       :localleader
       :desc "Toggle font style" "F" #'mixed-pitch-mode)
-
-(map! :after org
-      :map org-mode-map
-      :localleader
-      :desc "Pretty-mode toggle" "P" #'+org-pretty-mode)
-
 #+end_src
 
 #+begin_src emacs-lisp :tangle no
@@ -813,9 +810,9 @@ portion
 (setq org-roam-capture-templates
       '(("d" "default"
          plain "%?"
-         :if-new (file+head "${slug}_%<%Y_%m_%d_%H%m%s>.org" "#+title: ${title}
-,#+filetags:
+         :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}
 ,#+category: ${title}
+,#+filetags:
 ,#+date: %U\n")
          :unnarrowed t)))
 
@@ -823,14 +820,32 @@ portion
       '(("d" "default"
          entry "* %<%H:%M> %?"
          :target (file+head "%<%Y_%m_%d>.org" "#+title: %<%Y-%m-%d>\n"))))
+
+(after! org-roam
+  (setq org-roam-node-display-template 
+        (format "${doom-hierarchy:*} %s %s"
+                (propertize "${doom-tags:78}" 'face 'org-tag) 
+                (propertize "${doom-type:10}" 'face 'font-lock-keyword-face))))
 #+end_src
 
-???
-#+begin_src emacs-lisp :tangle no
-(setq org-roam-dailies-capture-templates
-      '(("d" "default"
-         entry "* %<%H:%M> %?"
-         :target (file+head "%<%Y_%m_%d>.org" "#+title: %<%Y-%m-%d>\n"))))
+#+begin_src emacs-lisp 
+(defun robert/org-roam-preview-function ()
+  "Same as `org-roam-preview-default-function', but replaces org-roam links to literal-ish form."
+  (let ((beg (save-excursion
+               (org-roam-end-of-meta-data t)
+               (point)))
+        (end (save-excursion
+               (org-next-visible-heading 1)
+               (point))))
+     (s-replace-regexp "\\[id:\\([a-z0-9]\\)\\{8\\}-\\([a-z0-9]\\)\\{4\\}-\\([a-z0-9]\\)\\{4\\}-\\([a-z0-9]\\)\\{4\\}-\\([a-z0-9]\\)\\{12\\}\\]"
+                       ""
+                       (string-trim (buffer-substring-no-properties beg end)))
+))
+#+end_src
+
+#+begin_src emacs-lisp 
+(after! org-roam
+  (setq org-roam-preview-function 'robert/org-roam-preview-function))
 #+end_src
 
 **** Keyboard
@@ -844,12 +859,12 @@ portion
     (apply #'org-roam-node-insert args)))
 
 (map! :leader :desc "Node insert immediate" "n r i" #'org-roam-node-insert-immediate)
-(define-key evil-insert-state-map (kbd "C-M-n") 'org-roam-node-insert-immediate)
+;; (define-key evil-insert-state-map (kbd "C-M-n") 'org-roam-node-insert-immediate)
 
 (map! :leader :desc "Node insert" "n r I" #'org-roam-node-insert)
 #+end_src
 
-??? Don't remember
+??? system crafters 5 org roam...
 #+begin_src emacs-lisp :tangle no
 (defun robert/org-roam-filter-by-tag (tag-name)
   (lambda (node)
@@ -861,6 +876,7 @@ portion
            (robert/org-roam-filter-by-tag name)
            (org-roam-node-list))))
 #+end_src
+
 *** Org roam ui
 
 #+begin_src emacs-lisp
@@ -1078,4 +1094,30 @@ From [[https://qerub.se/hiding-hidden-files-in-emacs-dired][here]] and [[https:/
 (eval-after-load 'dired
   '(evil-define-key 'normal dired-mode-map
      (kbd "o") 'robert/dired-sort))
+#+end_src
+
+* PDF
+** Sci-hub
+
+#+begin_src emacs-lisp
+(use-package! scihub
+ :init
+ (setq scihub-download-directory "~/Documenti/papers/"
+       scihub-open-after-download t
+       scihub-fetch-domain 'scihub-fetch-domains-lovescihub))
+#+end_src
+
+** Open in Zathura
+
+Open in Zathura pdf reader current pdf in buffer. 
+#+begin_src emacs-lisp
+(defun robert/open-pdf-zathura ()
+  (interactive)
+  (async-shell-command 
+   (concat "zathura --page=" (pdf-view-current-pagelabel) " " (buffer-file-name))))
+
+(map! :after pdf-tools
+      :map pdf-view-mode-map
+      :localleader
+      :desc "Open pdf in zathura" "m" #'robert/open-pdf-zathura)
 #+end_src
