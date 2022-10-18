@@ -29,7 +29,7 @@
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
-(setq org-directory "~/Documenti/emacs/org/")
+(setq org-directory "~/Documents/emacs/org/")
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -266,9 +266,9 @@
   "Moves image from screenshot folder to `buffer-file-name'_media, inserting org-mode link"
   (interactive)
   (let* (
-         ;; (indir (expand-file-name ~/Documenti/emacs/screenshots))
-         (infile (aj-fetch-latest "~/Documenti/emacs/screenshots"))
-         ;; (infile (get-newest-file-from-dir "~/Documenti/emacs/screenshots"))
+         ;; (indir (expand-file-name ~/Documents/emacs/screenshots))
+         (infile (aj-fetch-latest "~/Documents/emacs/screenshots"))
+         ;; (infile (get-newest-file-from-dir "~/Documents/emacs/screenshots"))
          (outdir (concat (buffer-file-name) "_media"))
          (outfile (expand-file-name (file-name-nondirectory infile) outdir)))
     (unless (file-directory-p outdir)
@@ -291,9 +291,9 @@
   "Moves image from screenshot folder to `buffer-file-name'_media, inserting org-mode link"
   (interactive)
   (let* (
-         ;; (indir (expand-file-name ~/Documenti/emacs/screenshots))
-         (infile (aj-fetch-latest "~/Documenti/emacs/screenshots"))
-         ;; (infile (get-newest-file-from-dir "~/Documenti/emacs/screenshots"))
+         ;; (indir (expand-file-name ~/Documents/emacs/screenshots))
+         (infile (aj-fetch-latest "~/Documents/emacs/screenshots"))
+         ;; (infile (get-newest-file-from-dir "~/Documents/emacs/screenshots"))
          (outdir (concat (buffer-file-name) "_media"))
          (outfile (expand-file-name (file-name-nondirectory infile) outdir)))
     (unless (file-directory-p outdir)
@@ -383,13 +383,13 @@
 
 (after! org
   (setq org-capture-templates
-        '(("t" "Todo" plain (file+headline "~/Documenti/emacs/org/capture/task.org" "TODO")
+        '(("t" "Todo" plain (file+headline "~/Documents/emacs/org/capture/task.org" "TODO")
            "- [ ] %?"
            :unnarrowed nil)
-          ("j" "Journal" entry (file+datetree "~/Documenti/emacs/org/capture/journal.org")
+          ("j" "Journal" entry (file+datetree "~/Documents/emacs/org/capture/journal.org")
            "* %?\nEntered on %U\n  %i\n  %a\n\n"
            :unnarrowed nil)
-          ("n" "Nota" plain (file "~/Documenti/emacs/org/capture/note.org" )
+          ("n" "Nota" plain (file "~/Documents/emacs/org/capture/note.org" )
            "* %?\n  %i\n  %a\n\n"
            :unnarrowed nil))))
 
@@ -398,7 +398,7 @@
       org-journal-date-format "%A, %Y_%m_%d"
       org-journal-file-format "%Y_%m_%d.org")
 
-(setq org-roam-directory "~/Documenti/emacs/org/roam")
+(setq org-roam-directory "~/Documents/emacs/org/roam")
 
 (setq org-roam-capture-templates
       '(("d" "default"
@@ -541,7 +541,7 @@ done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
 
 (use-package! scihub
  :init
- (setq scihub-download-directory "~/Documenti/papers/"
+ (setq scihub-download-directory "~/Documents/papers/"
        scihub-open-after-download t
        scihub-fetch-domain 'scihub-fetch-domains-lovescihub))
 
