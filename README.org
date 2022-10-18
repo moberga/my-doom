@@ -1114,7 +1114,10 @@ Open in Zathura pdf reader current pdf in buffer.
 (defun robert/open-pdf-zathura ()
   (interactive)
   (async-shell-command 
-   (concat "zathura --page=" (pdf-view-current-pagelabel) " " (buffer-file-name))))
+   (concat "zathura --page=\"" 
+           (format "%d"
+                   (eval `(pdf-view-current-page)))
+           "\" \"" (buffer-file-name)"\"")))
 
 (map! :after pdf-tools
       :map pdf-view-mode-map
