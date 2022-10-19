@@ -215,7 +215,7 @@
         ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" .
         "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
 
-(setq citar-bibliography "/home/rob/Documents/.MyLibrary.bib")
+(setq citar-bibliography '("/home/rob/Documents/.MyLibrary.bib"))
 (setq org-cite-global-bibliography '("/home/rob/Documents/.MyLibrary.bib"))
 
 (defun occur-mode-clean-buffer ()

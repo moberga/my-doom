@@ -5,6 +5,7 @@
  ;; If there is more than one, they won't work right.
  '(async-shell-command-display-buffer nil)
  '(auth-source-save-behavior nil)
+ '(c-mode-hook '(macrostep-c-mode-hook))
  '(doom-modeline-buffer-file-name-style 'auto)
  '(grep-command "rg --color=auto -niH --null -e ")
  '(org-agenda-files '("/home/rob/Documenti/emacs/org/capture/task.org"))

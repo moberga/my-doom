@@ -497,7 +497,7 @@ Added extarticle for bigger text
 *** Bibliography
 
 #+begin_src emacs-lisp
-(setq citar-bibliography "/home/rob/Documents/.MyLibrary.bib")
+(setq citar-bibliography '("/home/rob/Documents/.MyLibrary.bib"))
 (setq org-cite-global-bibliography '("/home/rob/Documents/.MyLibrary.bib"))
 #+end_src
 
