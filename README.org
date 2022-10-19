@@ -494,6 +494,13 @@ Added extarticle for bigger text
         "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
 #+end_src
 
+*** Bibliography
+
+#+begin_src emacs-lisp
+(setq citar-bibliography "/home/rob/Documents/.MyLibrary.bib")
+(setq org-cite-global-bibliography '("/home/rob/Documents/.MyLibrary.bib"))
+#+end_src
+
 ** Functions
 *** Occur Buffer for tree view of org mode headers
 

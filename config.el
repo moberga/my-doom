@@ -215,6 +215,9 @@
         ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" .
         "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
 
+(setq citar-bibliography "/home/rob/Documents/.MyLibrary.bib")
+(setq org-cite-global-bibliography '("/home/rob/Documents/.MyLibrary.bib"))
+
 (defun occur-mode-clean-buffer ()
   "Removes all commentary from the *Occur* buffer, leaving the
  unadorned lines."
@@ -548,7 +551,10 @@ done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
 (defun robert/open-pdf-zathura ()
   (interactive)
   (async-shell-command 
-   (concat "zathura --page=" (pdf-view-current-pagelabel) " " (buffer-file-name))))
+   (concat "zathura --page=\"" 
+           (format "%d"
+                   (eval `(pdf-view-current-page)))
+           "\" \"" (buffer-file-name)"\"")))
 
 (map! :after pdf-tools
       :map pdf-view-mode-map

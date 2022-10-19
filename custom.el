@@ -8,6 +8,7 @@
  '(doom-modeline-buffer-file-name-style 'auto)
  '(grep-command "rg --color=auto -niH --null -e ")
  '(org-agenda-files '("/home/rob/Documenti/emacs/org/capture/task.org"))
+ '(org-cite-global-bibliography "/home/rob/Documents/.MyLibrary.bib")
  '(org-download-screenshot-method "xfce4-screenshooter -r -o cat > %s")
  '(org-ellipsis " ^ ")
  '(org-latex-default-packages-alist
