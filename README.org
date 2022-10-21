@@ -30,6 +30,10 @@
 - [[#pdf][PDF]]
   - [[#sci-hub][Sci-hub]]
   - [[#open-in-zathura][Open in Zathura]]
+- [[#novel][Nov.el]]
+  - [[#variables-4][Variables]]
+  - [[#functions-4][Functions]]
+  - [[#keyboard-4][Keyboard]]
 
 * Doom Default configuration
 Standard configuration of Doom Emacs
@@ -119,10 +123,23 @@ When executing macros they stop at the end of the file.
 (remove-hook 'doom-first-buffer-hook #'ws-butler-global-mode)
 #+end_src
 
-*** Template di python
+*** C mode
 
-#+begin_src emacs-lisp
-(set-file-template! "/__\\.py$g" :trigger "__" :mode 'python-mode)
+#+begin_src emacs-lisp 
+(defun robert/run-c-program ()
+  (interactive)
+  (set-popup-rules!
+    '(("*Async Shell Command*"
+       :side bottom
+       :size 0.30
+       :quit t
+       :select nil)))
+  (async-shell-command (concat "./" (file-name-base))))
+
+(map! :after cc-mode
+      :map c-mode-map
+      :localleader
+      :desc "Run program" "r" #'robert/run-c-program)
 #+end_src
 
 *** Workspaces main
@@ -210,12 +227,6 @@ From [[https://emacs.stackexchange.com/questions/3245/kill-buffer-prompt-with-op
 ;;           (apply orig-func (list (current-buffer))))))))
 
 ;; (advice-add 'kill-buffer :around #'robert/kill-buffer)
-#+end_src
-
-*** Epub
-
-#+begin_src emacs-lisp
-(add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
 #+end_src
 
 ** Keyboard 
@@ -317,7 +328,7 @@ This is the ascii splash image.
 This is the image splash image for the GUI.
 
 #+begin_src emacs-lisp
-(setq fancy-splash-image "~/Pictures/.emacs_mars.png")
+(setq fancy-splash-image "~/.config/doom/emacs_spike.png")
 
 (assoc-delete-all "Reload last session" +doom-dashboard-menu-sections)
 (assoc-delete-all "Open org-agenda" +doom-dashboard-menu-sections)
@@ -455,8 +466,8 @@ Rimuove la scorciatoia di default per la correzione automatica e ne aggiunge un'
 #+begin_src emacs-lisp
 (add-hook 'org-mode-hook 'mixed-pitch-mode)
 (add-hook 'org-mode-hook '+org-pretty-mode)
-(add-hook 'org-mode-hook '(lambda () (text-scale-increase +1)))
-(add-hook 'org-mode-hook '(lambda () (modify-syntax-entry ?\' " ")))
+(add-hook 'org-mode-hook #'(lambda () (text-scale-increase +1)))
+(add-hook 'org-mode-hook #'(lambda () (modify-syntax-entry ?\' " ")))
 #+end_src
 
 *** Org-ellipses
@@ -1130,4 +1141,44 @@ Open in Zathura pdf reader current pdf in buffer.
       :map pdf-view-mode-map
       :localleader
       :desc "Open pdf in zathura" "m" #'robert/open-pdf-zathura)
+#+end_src
+
+* Nov.el
+** Variables
+
+#+begin_src emacs-lisp
+(setq nov-text-width 90)
+#+end_src
+
+** Functions
+
+#+begin_src emacs-lisp
+(add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
+#+end_src
+
+#+begin_src emacs-lisp
+(defun robert/nov-font-setup ()
+  (face-remap-add-relative 'variable-pitch :family "IBM Plex Serif"
+                                           :height 1.4))
+
+(add-hook 'nov-mode-hook 'robert/nov-font-setup)
+#+end_src
+
+** Keyboard
+
+#+begin_src emacs-lisp
+(after! nov
+  (define-key nov-mode-map (kbd "SPC") nil)
+  (define-key nov-mode-map (kbd "S-SPC") nil)
+  (define-key nov-mode-map (kbd "l") nil)
+  (define-key nov-mode-map (kbd "r") nil)
+  (define-key nov-button-map (kbd "SPC") nil)
+  (define-key nov-button-map (kbd "S-SPC") nil)
+  (define-key nov-button-map (kbd "l") nil)
+  (define-key nov-button-map (kbd "r") nil)
+)
+
+(with-eval-after-load 'nov
+  (evil-define-key 'normal nov-mode-map (kbd "S-SPC") nil)
+  (evil-define-key 'normal nov-mode-map (kbd "DEL") nil))
 #+end_src

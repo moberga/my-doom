@@ -61,7 +61,20 @@
 
 (remove-hook 'doom-first-buffer-hook #'ws-butler-global-mode)
 
-(set-file-template! "/__\\.py$g" :trigger "__" :mode 'python-mode)
+(defun robert/run-c-program ()
+  (interactive)
+  (set-popup-rules!
+    '(("*Async Shell Command*"
+       :side bottom
+       :size 0.30
+       :quit t
+       :select nil)))
+  (async-shell-command (concat "./" (file-name-base))))
+
+(map! :after cc-mode
+      :map c-mode-map
+      :localleader
+      :desc "Run program" "r" #'robert/run-c-program)
 
 (setq +workspaces-main "#1")
 
@@ -107,8 +120,6 @@
 (map! :leader :desc "Kill buffer" "b k" #'robert/kill-current-buffer)
 (map! :leader :desc "Kill buffer" "b d" #'kill-buffer-and-window)
 
-(add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
-
 (map! :leader "SPC" nil)
 
 (map! :leader "X" nil)
@@ -136,7 +147,7 @@
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
 (add-to-list 'default-frame-alist '(undecorated . t))
 
-(setq fancy-splash-image "~/Pictures/.emacs_mars.png")
+(setq fancy-splash-image "~/.config/doom/emacs_spike.png")
 
 (assoc-delete-all "Reload last session" +doom-dashboard-menu-sections)
 (assoc-delete-all "Open org-agenda" +doom-dashboard-menu-sections)
@@ -187,8 +198,8 @@
 
 (add-hook 'org-mode-hook 'mixed-pitch-mode)
 (add-hook 'org-mode-hook '+org-pretty-mode)
-(add-hook 'org-mode-hook '(lambda () (text-scale-increase +1)))
-(add-hook 'org-mode-hook '(lambda () (modify-syntax-entry ?\' " ")))
+(add-hook 'org-mode-hook #'(lambda () (text-scale-increase +1)))
+(add-hook 'org-mode-hook #'(lambda () (modify-syntax-entry ?\' " ")))
 
 (setq org-ellipses "^")
 
@@ -560,3 +571,23 @@ done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
       :map pdf-view-mode-map
       :localleader
       :desc "Open pdf in zathura" "m" #'robert/open-pdf-zathura)
+
+(add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
+
+(defun robert/nov-font-setup ()
+  (face-remap-add-relative 'variable-pitch :family "IBM Plex Serif"
+                                           :height 1.4))
+
+(add-hook 'nov-mode-hook 'robert/nov-font-setup)
+
+(setq nov-text-width 90)
+
+(after! nov
+  (define-key nov-mode-map (kbd "SPC") nil)
+  (define-key nov-mode-map (kbd "S-SPC") nil)
+  (define-key nov-mode-map (kbd "l") nil)
+  (define-key nov-mode-map (kbd "r") nil))
+
+(with-eval-after-load 'nov
+  (evil-define-key 'normal nov-mode-map (kbd "S-SPC") nil)
+  (evil-define-key 'normal nov-mode-map (kbd "DEL") nil))
