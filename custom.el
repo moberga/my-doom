@@ -6,7 +6,7 @@
  '(async-shell-command-display-buffer nil)
  '(auth-source-save-behavior nil)
  '(c-mode-hook '(macrostep-c-mode-hook) t)
- '(cursor-type 'hollow)
+ '(cursor-type 'box)
  '(doom-modeline-buffer-file-name-style 'auto)
  '(grep-command "rg --color=auto -niH --null -e ")
  '(org-agenda-files '("/home/rob/Documenti/emacs/org/capture/task.org"))

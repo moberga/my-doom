@@ -1151,10 +1151,13 @@ Open in Zathura pdf reader current pdf in buffer.
 #+end_src
 
 ** Functions
+*** Config
 
 #+begin_src emacs-lisp
 (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
 #+end_src
+
+*** Font style
 
 #+begin_src emacs-lisp
 (defun robert/nov-font-setup ()
@@ -1164,7 +1167,20 @@ Open in Zathura pdf reader current pdf in buffer.
 (add-hook 'nov-mode-hook 'robert/nov-font-setup)
 #+end_src
 
+*** Change style of cursor
+
+Less distracting cursor
+
+#+begin_src emacs-lisp
+(add-hook 'writeroom-mode-enable-hook #'(lambda () (setq-local evil-normal-state-cursor 'hollow)))
+(add-hook 'writeroom-mode-enable-hook #'(lambda () (hl-line-mode -1)))
+
+(add-hook 'writeroom-mode-disable-hook #'(lambda () (setq-local evil-normal-state-cursor 'box)))
+(add-hook 'writeroom-mode-disable-hook #'(lambda () (hl-line-mode)))
+#+end_src
+
 ** Keyboard
+*** Remove some keybindings
 
 #+begin_src emacs-lisp
 (after! nov

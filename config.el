@@ -572,6 +572,8 @@ done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
       :localleader
       :desc "Open pdf in zathura" "m" #'robert/open-pdf-zathura)
 
+(setq nov-text-width 90)
+
 (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
 
 (defun robert/nov-font-setup ()
@@ -580,13 +582,22 @@ done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
 
 (add-hook 'nov-mode-hook 'robert/nov-font-setup)
 
-(setq nov-text-width 90)
+(add-hook 'writeroom-mode-enable-hook #'(lambda () (setq cursor-type 'hollow)))
+(add-hook 'writeroom-mode-enable-hook #'(lambda () (hl-line-mode -1)))
+
+;; (add-hook 'writeroom-mode-disable-hook #'(lambda () (kill-local-variable cursor-type)))
+(add-hook 'writeroom-mode-disable-hook #'(lambda () (hl-line-mode)))
 
 (after! nov
   (define-key nov-mode-map (kbd "SPC") nil)
   (define-key nov-mode-map (kbd "S-SPC") nil)
   (define-key nov-mode-map (kbd "l") nil)
-  (define-key nov-mode-map (kbd "r") nil))
+  (define-key nov-mode-map (kbd "r") nil)
+  (define-key nov-button-map (kbd "SPC") nil)
+  (define-key nov-button-map (kbd "S-SPC") nil)
+  (define-key nov-button-map (kbd "l") nil)
+  (define-key nov-button-map (kbd "r") nil)
+)
 
 (with-eval-after-load 'nov
   (evil-define-key 'normal nov-mode-map (kbd "S-SPC") nil)
