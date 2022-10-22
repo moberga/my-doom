@@ -582,10 +582,10 @@ done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
 
 (add-hook 'nov-mode-hook 'robert/nov-font-setup)
 
-(add-hook 'writeroom-mode-enable-hook #'(lambda () (setq cursor-type 'hollow)))
+(add-hook 'writeroom-mode-enable-hook #'(lambda () (setq-local evil-normal-state-cursor 'hbar)))
 (add-hook 'writeroom-mode-enable-hook #'(lambda () (hl-line-mode -1)))
 
-;; (add-hook 'writeroom-mode-disable-hook #'(lambda () (kill-local-variable cursor-type)))
+(add-hook 'writeroom-mode-disable-hook #'(lambda () (setq-local evil-normal-state-cursor 'box)))
 (add-hook 'writeroom-mode-disable-hook #'(lambda () (hl-line-mode)))
 
 (after! nov

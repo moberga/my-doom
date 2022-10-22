@@ -1121,7 +1121,7 @@ Open in Zathura pdf reader current pdf in buffer.
 Less distracting cursor
 
 #+begin_src emacs-lisp
-(add-hook 'writeroom-mode-enable-hook #'(lambda () (setq-local evil-normal-state-cursor 'hollow)))
+(add-hook 'writeroom-mode-enable-hook #'(lambda () (setq-local evil-normal-state-cursor 'hbar)))
 (add-hook 'writeroom-mode-enable-hook #'(lambda () (hl-line-mode -1)))
 
 (add-hook 'writeroom-mode-disable-hook #'(lambda () (setq-local evil-normal-state-cursor 'box)))
