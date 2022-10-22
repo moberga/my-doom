@@ -204,31 +204,6 @@ From [[https://emacs.stackexchange.com/questions/3245/kill-buffer-prompt-with-op
 (map! :leader :desc "Kill buffer" "b d" #'kill-buffer-and-window)
 #+end_src
 
-
-#+begin_src emacs-lisp :tangle no
-;; This works only when `kill-buffer' is called, does nothing in ibuffer idk
-;; Removed because gives error "error in process sentinel selecting deleted buffer"
-;; when calling `org-agenda-file-to-front' 
-;; (defun robert/kill-buffer (orig-func &optional buffer-or-name)
-;;   (catch 'quit
-;;     (save-window-excursion
-;;       (with-current-buffer buffer-or-name
-;;         (let (done (buf (current-buffer)))
-;;           (when (and buffer-file-name (buffer-modified-p))
-;;             (while (not done)
-;;               (let ((response (read-char-choice
-;;                                (format "Save file %s? (y, n, d, q) " (buffer-file-name buf))
-;;                                '(?y ?n ?d ?q))))
-;;                 (setq done (cond
-;;                             ((eq response ?q) (throw 'quit nil))
-;;                             ((eq response ?y) (save-buffer) t)
-;;                             ((eq response ?n) (set-buffer-modified-p nil) t)
-;;                             ((eq response ?d) (diff-buffer-with-file) nil))))))
-;;           (apply orig-func (list (current-buffer))))))))
-
-;; (advice-add 'kill-buffer :around #'robert/kill-buffer)
-#+end_src
-
 ** Keyboard 
 *** Remove SPC-SPC shortcut
 
@@ -260,13 +235,6 @@ Aggiunge la scorciatoia per copiare quello che è sotto
 
 #+begin_src emacs-lisp
 (define-key evil-insert-state-map (kbd "\C-e") 'evil-copy-from-below)
-#+end_src
-
-*** Switch +vterm/toggle and +vterm/here
-
-#+begin_src emacs-lisp :tangle no
-(map! :leader :desc "Open vterm popup" "o T" #'+vterm/toggle)
-(map! :leader :desc "Open vterm here" "o t" #'+vterm/here)
 #+end_src
 
 *** Ctrl+ins, Shift+ins always system clipboard
@@ -303,6 +271,12 @@ From [[https://emacs.stackexchange.com/questions/2999/how-to-maximize-my-emacs-f
 
 From [[https://discourse.doomemacs.org/t/how-to-change-your-splash-screen/57][discourse]].
 
+This is the image splash image for the GUI.
+
+#+begin_src emacs-lisp
+(setq fancy-splash-image "~/.config/doom/emacs_spike.png")
+#+end_src
+
 This is the ascii splash image.
 
 #+begin_src emacs-lisp :tangle no
@@ -325,11 +299,7 @@ This is the ascii splash image.
 (setq +doom-dashboard-ascii-banner-fn #'my-weebery-is-always-greater)
 #+end_src
 
-This is the image splash image for the GUI.
-
 #+begin_src emacs-lisp
-(setq fancy-splash-image "~/.config/doom/emacs_spike.png")
-
 (assoc-delete-all "Reload last session" +doom-dashboard-menu-sections)
 (assoc-delete-all "Open org-agenda" +doom-dashboard-menu-sections)
 (assoc-delete-all "Open project" +doom-dashboard-menu-sections)
@@ -571,33 +541,12 @@ occur command was called.
       :desc "Show Org tree" ";" #'robert/occur-tree-org)
 #+end_src
 
-Test of toggle function
-#+begin_src emacs-lisp :tangle no
-(defun robert/toggle-org-occur-tree ()
-  "Toggle the side panel of occur in org mode"
-  (interactive)
-  (let ((occur-buffer-name (concat "*Occur: " (buffer-name) "*" ))
-    ;;if, cond"-Occur*"
-    (if (get-buffer occur-buffer-name)
-        ;;then
-        (with-current-buffer occur-buffer-name
-         
-         ) ()))))
-#+end_src
-
 *** Screenshot insertion from screenshot folder
 
 From [[https://old.reddit.com/r/emacs/comments/52q70g/paste_an_image_on_clipboard_to_emacs_org_mode/][reddit]]. 
 I have a shell script to create screenshots with =xfce4-screenshooter= to select
 a region and assign a name in a specific path.
 Hours wasted for this thing: 10.
-
-???
-#+begin_src emacs-lisp :tangle no
-(defun get-newest-file-from-dir  (path)
-  "Get latest file (including directory) in PATH."
-  (car (directory-files path 'full nil #'file-newer-than-file-p)))
-#+end_src
 
 #+begin_src emacs-lisp 
 (defun aj-fetch-latest (path)
