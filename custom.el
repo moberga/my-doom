@@ -9,7 +9,9 @@
  '(cursor-type 'box)
  '(doom-modeline-buffer-file-name-style 'auto)
  '(grep-command "rg --color=auto -niH --null -e ")
+ '(nov-text-width nil t)
  '(org-agenda-files '("/home/rob/Documenti/emacs/org/capture/task.org"))
+ '(org-anki-default-deck "Anki-org-roam")
  '(org-cite-global-bibliography "/home/rob/Documents/.MyLibrary.bib")
  '(org-download-screenshot-method "xfce4-screenshooter -r -o cat > %s")
  '(org-ellipsis " ^ ")
@@ -26,6 +28,7 @@
      ("" "amsmath" t nil)
      ("" "amssymb" t nil)
      ("" "capt-of" nil nil)))
+ '(scihub-homepage "http://sci-hub.ee")
  '(vertico-count 12))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

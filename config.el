@@ -101,23 +101,6 @@
 
 (define-key evil-normal-state-map (kbd "Q") 'robert/execute-in-shell-and-put-in-buffer)
 
-(defun robert/kill-current-buffer ()
-  (interactive)
-  (catch 'quit
-    (save-window-excursion
-      (let (done)
-        (when (and buffer-file-name (buffer-modified-p))
-          (while (not done)
-            (let ((response (read-char-choice
-                             (format "Save file %s? (y, n, d, q) " (buffer-file-name))
-                             '(?y ?n ?d ?q))))
-              (setq done (cond
-                          ((eq response ?q) (throw 'quit nil))
-                          ((eq response ?y) (save-buffer) t)
-                          ((eq response ?n) (set-buffer-modified-p nil) t)
-                          ((eq response ?d) (diff-buffer-with-file) nil))))))
-        (kill-buffer (current-buffer))))))
-(map! :leader :desc "Kill buffer" "b k" #'robert/kill-current-buffer)
 (map! :leader :desc "Kill buffer" "b d" #'kill-buffer-and-window)
 
 (map! :leader "SPC" nil)
@@ -163,6 +146,10 @@
 
 (remove-hook '+popup-buffer-mode-hook #'+popup-set-modeline-on-enable-h)
 
+(set-popup-rules!
+  '(("^\\*Async Shell Command" :quit t :size 0.3)
+    ("^\\Man" :select t :size 1)))
+
 (setq gts-translate-list '(("it" "en")
                            ("en" "it")
                            ("it" "es")
@@ -203,28 +190,12 @@
 
 (setq org-ellipses "^")
 
-(setq org-latex-classes '(
-    ("beamer" "\\documentclass[presentation]{beamer}"
-        ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}")
-        ("\\subsubsection{%s}" . "\\subsubsection*{%s}")) 
-    ("article" "\\documentclass[11pt]{article}" 
-        ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" .
-        "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}") 
-        ("\\paragraph{%s}" . "\\paragraph*{%s}")
-        ("\\subparagraph{%s}" . "\\subparagraph*{%s}")) 
-    ("extarticle" "\\documentclass[14pt]{article}" 
-        ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" .
-        "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-        ("\\paragraph{%s}" . "\\paragraph*{%s}")
-        ("\\subparagraph{%s}" . "\\subparagraph*{%s}")) 
-    ("report" "\\documentclass[11pt]{report}" 
-        ("\\part{%s}" . "\\part*{%s}") ("\\chapter{%s}" . "\\chapter*{%s}")
-        ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" .
-        "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))
-    ("book" "\\documentclass[11pt]{book}" 
-        ("\\part{%s}" . "\\part*{%s}") ("\\chapter{%s}" . "\\chapter*{%s}") 
-        ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" .
-        "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
+(with-eval-after-load 'ox-latex
+    (add-to-list 'org-latex-classes '("extarticle" "\\documentclass[14pt]{article}" 
+            ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" .
+            "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+            ("\\paragraph{%s}" . "\\paragraph*{%s}")
+            ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
 
 (setq citar-bibliography '("/home/rob/Documents/.MyLibrary.bib"))
 (setq org-cite-global-bibliography '("/home/rob/Documents/.MyLibrary.bib"))
@@ -364,7 +335,7 @@
 
 (defun +org-present-prettify-slide-h-custom ()
   "Set up the org window for presentation."
-  (setq +org-present-text-scale 5)
+  (setq +org-present-text-scale 3)
   (let ((arg (if org-tree-slide-mode +1 -1)))
     (if (not org-tree-slide-mode)
         (when +org-present--last-wconf
@@ -582,11 +553,15 @@ done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
 
 (add-hook 'nov-mode-hook 'robert/nov-font-setup)
 
-(add-hook 'writeroom-mode-enable-hook #'(lambda () (setq-local evil-normal-state-cursor 'hbar)))
-(add-hook 'writeroom-mode-enable-hook #'(lambda () (hl-line-mode -1)))
+(add-hook 'writeroom-mode-enable-hook #'(lambda () 
+                                          (setq-local evil-normal-state-cursor 'hbar)
+                                          (hl-line-mode -1)))
+;; (add-hook 'writeroom-mode-enable-hook #'(lambda () (hl-line-mode -1)))
 
-(add-hook 'writeroom-mode-disable-hook #'(lambda () (setq-local evil-normal-state-cursor 'box)))
-(add-hook 'writeroom-mode-disable-hook #'(lambda () (hl-line-mode)))
+(add-hook 'writeroom-mode-disable-hook #'(lambda () 
+                                           (setq-local evil-normal-state-cursor 'box)
+                                           (hl-line-mode)))
+;; (add-hook 'writeroom-mode-disable-hook #'(lambda () (hl-line-mode)))
 
 (after! nov
   (define-key nov-mode-map (kbd "SPC") nil)

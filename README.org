@@ -183,7 +183,7 @@ with the command. Repeating the command updates the output.
 *** Show diff before close file
 From [[https://emacs.stackexchange.com/questions/3245/kill-buffer-prompt-with-option-to-diff-the-changes/3363#3363][here]]. Code from 2014.
 
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp :tangle no
 (defun robert/kill-current-buffer ()
   (interactive)
   (catch 'quit
@@ -201,6 +201,9 @@ From [[https://emacs.stackexchange.com/questions/3245/kill-buffer-prompt-with-op
                           ((eq response ?d) (diff-buffer-with-file) nil))))))
         (kill-buffer (current-buffer))))))
 (map! :leader :desc "Kill buffer" "b k" #'robert/kill-current-buffer)
+#+end_src
+
+#+begin_src emacs-lisp
 (map! :leader :desc "Kill buffer" "b d" #'kill-buffer-and-window)
 #+end_src
 
@@ -351,22 +354,10 @@ Completely disable management of the mode-line in popups:
 (remove-hook '+popup-buffer-mode-hook #'+popup-set-modeline-on-enable-h)
 #+end_src
 
-???
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp 
 (set-popup-rules!
-  '(
-    ("*Async Shell Command*"
-     :side bottom
-     :size 0.30
-     :quit t
-     :select nil)
-    )
-  )
-#+end_src
-
-???
-#+begin_src emacs-lisp :tangle no
-(plist-put +popup-defaults :height 30)
+  '(("^\\*Async Shell Command" :quit t :size 0.3)
+    ("^\\Man" :select t :size 1)))
 #+end_src
 
 * Language
@@ -450,7 +441,16 @@ Rimuove la scorciatoia di default per la correzione automatica e ne aggiunge un'
 
 Added extarticle for bigger text
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp 
+(with-eval-after-load 'ox-latex
+    (add-to-list 'org-latex-classes '("extarticle" "\\documentclass[14pt]{article}" 
+            ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" .
+            "\\subsection*{%s}") ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+            ("\\paragraph{%s}" . "\\paragraph*{%s}")
+            ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
+#+end_src
+
+#+begin_src emacs-lisp :tangle no
 (setq org-latex-classes '(
     ("beamer" "\\documentclass[presentation]{beamer}"
         ("\\section{%s}" . "\\section*{%s}") ("\\subsection{%s}" . "\\subsection*{%s}")
@@ -666,7 +666,8 @@ same directory as the org-buffer and insert a link to this file."
 
 #+begin_src emacs-lisp
 (with-eval-after-load "org"
-  (define-key org-mode-map (kbd "<C-M-return>") #'org-insert-heading))
+  (define-key org-mode-map (kbd "<M-return>") 
+    #'evil-org-org-insert-heading-respect-content-below))
 #+end_src
 
 ** Org functionality
@@ -709,7 +710,7 @@ portion
 #+begin_src emacs-lisp
 (defun +org-present-prettify-slide-h-custom ()
   "Set up the org window for presentation."
-  (setq +org-present-text-scale 5)
+  (setq +org-present-text-scale 3)
   (let ((arg (if org-tree-slide-mode +1 -1)))
     (if (not org-tree-slide-mode)
         (when +org-present--last-wconf
@@ -1121,11 +1122,15 @@ Open in Zathura pdf reader current pdf in buffer.
 Less distracting cursor
 
 #+begin_src emacs-lisp
-(add-hook 'writeroom-mode-enable-hook #'(lambda () (setq-local evil-normal-state-cursor 'hbar)))
-(add-hook 'writeroom-mode-enable-hook #'(lambda () (hl-line-mode -1)))
+(add-hook 'writeroom-mode-enable-hook #'(lambda () 
+                                          (setq-local evil-normal-state-cursor 'hbar)
+                                          (hl-line-mode -1)))
+;; (add-hook 'writeroom-mode-enable-hook #'(lambda () (hl-line-mode -1)))
 
-(add-hook 'writeroom-mode-disable-hook #'(lambda () (setq-local evil-normal-state-cursor 'box)))
-(add-hook 'writeroom-mode-disable-hook #'(lambda () (hl-line-mode)))
+(add-hook 'writeroom-mode-disable-hook #'(lambda () 
+                                           (setq-local evil-normal-state-cursor 'box)
+                                           (hl-line-mode)))
+;; (add-hook 'writeroom-mode-disable-hook #'(lambda () (hl-line-mode)))
 #+end_src
 
 ** Keyboard

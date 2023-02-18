@@ -4,6 +4,7 @@
 # --
 
 :Org_properties:
+#+TITLE:`(file-name-base (buffer-name))`
 #+EXPORT_FILE_NAME: "${1:`(file-name-base (buffer-name))`}.pdf"
 
 #+LANGUAGE: it
@@ -46,6 +47,8 @@
 # +LATEX_HEADER: \usepackage{isotope}
 
 # INDICE ANANLITICO (NON rimuovere hyperref)
+# per usare questo è necessario rimuovere hyperref da
+# org-latex-default-packages-alist 
 # +LATEX_HEADER: \renewcommand{\footnote}{\index}
 # +LATEX_HEADER: \usepackage{imakeidx}
 #+LATEX_HEADER: \usepackage{hyperref}

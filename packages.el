@@ -66,3 +66,4 @@
 (package! org-roam-ui)
 
 (package! scihub :recipe (:host github :repo "emacs-pe/scihub.el"))
+
