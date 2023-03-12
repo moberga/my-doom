@@ -10,7 +10,7 @@
  '(doom-modeline-buffer-file-name-style 'auto)
  '(grep-command "rg --color=auto -niH --null -e ")
  '(nov-text-width nil t)
- '(org-agenda-files '("/home/rob/Documenti/emacs/org/capture/task.org"))
+ '(org-agenda-files '("~/Documents/emacs/org/capture/task.org"))
  '(org-anki-default-deck "Anki-org-roam")
  '(org-cite-global-bibliography "/home/rob/Documents/.MyLibrary.bib")
  '(org-download-screenshot-method "xfce4-screenshooter -r -o cat > %s")

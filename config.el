@@ -311,7 +311,8 @@
       :desc "Toggle font style" "F" #'mixed-pitch-mode)
 
 (with-eval-after-load "org"
-  (define-key org-mode-map (kbd "<C-M-return>") #'org-insert-heading))
+  (define-key org-mode-map (kbd "<M-return>") 
+    #'evil-org-org-insert-heading-respect-content-below))
 
 (defun robert/org-tree-slide-play-mode-hook ()
   ;; (interactive)
@@ -481,7 +482,7 @@
   "Open the current file's directory in external file browser."
   (interactive)
   (if (equal major-mode 'dired-mode)
-      (consult-file-externally (dired-get-filename))
+      (embark-open-externally (dired-get-filename))
       (browse-url (expand-file-name default-directory))))
 
 (map! :leader :desc "Browse or open externally" "o x" #'robert/open-file-externally)

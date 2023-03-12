@@ -941,7 +941,7 @@ the default directory of the currently open file in any other mode.
   "Open the current file's directory in external file browser."
   (interactive)
   (if (equal major-mode 'dired-mode)
-      (consult-file-externally (dired-get-filename))
+      (embark-open-externally (dired-get-filename))
       (browse-url (expand-file-name default-directory))))
 #+end_src
 
