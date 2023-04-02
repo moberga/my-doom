@@ -482,7 +482,7 @@
   "Open the current file's directory in external file browser."
   (interactive)
   (if (equal major-mode 'dired-mode)
-      (embark-open-externally (dired-get-filename))
+      (browse-url-xdg-open (dired-get-filename))
       (browse-url (expand-file-name default-directory))))
 
 (map! :leader :desc "Browse or open externally" "o x" #'robert/open-file-externally)
