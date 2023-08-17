@@ -60,17 +60,17 @@ Standard configuration of Doom Emacs
 ;;
 ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
 ;; font string. You generally only need these two:
-(setq doom-font (font-spec :family "Blex Mono Nerd Font" :size 17) ;; :weight 'regular)
+(setq doom-font (font-spec :family "IBM Plex Mono" :size 17) ;; :weight 'regular)
       doom-variable-pitch-font (font-spec :family "IBM Plex Sans" :size 19 :weight 'light))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-gruvbox)
+(setq doom-theme 'doom-laserwave)
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
-(setq org-directory "~/Documents/emacs/org/")
+(setq org-directory "~/Documenti/emacs/org/")
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -314,6 +314,14 @@ This is the ascii splash image.
   (insert "\n" (+doom-dashboard--center +doom-dashboard--width "I showed you my config files, pls respond")))
 #+end_src
 
+#+begin_src emacs-lisp :tangle no
+(add-to-list '+doom-dashboard-menu-sections
+             '("Open daily org-roam note"
+               :icon (all-the-icons-octicon "calendar" :face 'doom-dashboard-menu-title)
+               :when (featurep! :lang org +journal)
+               :face (:inherit (doom-dashboard-menu-title bold))
+               :action org-roam-dailies-goto-today))
+#+end_src
 ** Modeline font size
 
 The font size is actually fine, the icons are too big.
@@ -478,8 +486,8 @@ Added extarticle for bigger text
 *** Bibliography
 
 #+begin_src emacs-lisp
-(setq citar-bibliography '("/home/rob/Documents/.MyLibrary.bib"))
-(setq org-cite-global-bibliography '("/home/rob/Documents/.MyLibrary.bib"))
+(setq citar-bibliography '("/home/rob/Documenti/.MyLibrary.bib"))
+(setq org-cite-global-bibliography '("/home/rob/Documenti/.MyLibrary.bib"))
 #+end_src
 
 ** Functions
@@ -496,8 +504,9 @@ Unable to delete the header line (*number* matches for *match* in buffer: *buffe
 Text is read only.
 The occur buffer will be renamed with the name of the buffer from which the
 occur command was called. 
+does not work anymore
 
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp :tangle no
 (defun occur-mode-clean-buffer ()
   "Removes all commentary from the *Occur* buffer, leaving the
  unadorned lines."
@@ -520,7 +529,7 @@ occur command was called.
         ;; (+popup-mode)
         (hide-mode-line-mode)
         (+word-wrap-mode)
-        (text-scale-adjust -1)
+        ;;(text-scale-adjust -1)
         ;; (rename-buffer (concat "*" buff-name "-Occur*"))
         (occur-rename-buffer nil t)
         (read-only-mode 1))
@@ -528,12 +537,14 @@ occur command was called.
 ;; (add-hook 'occur-hook #'occur-mode-clean-buffer)
 #+end_src
 
-#+begin_src emacs-lisp
+this works
+#+begin_src emacs-lisp :tangle no
 (defun robert/occur-tree-org ()
   "Show headings of org file"
   (interactive)
   (occur "^\*+ ")
-  (occur-mode-clean-buffer))
+  ;; (occur-mode-clean-buffer)
+  )
 
 (map! :after org
       :map org-mode-map
@@ -560,9 +571,9 @@ Hours wasted for this thing: 10.
   "Moves image from screenshot folder to `buffer-file-name'_media, inserting org-mode link"
   (interactive)
   (let* (
-         ;; (indir (expand-file-name ~/Documents/emacs/screenshots))
-         (infile (aj-fetch-latest "~/Documents/emacs/screenshots"))
-         ;; (infile (get-newest-file-from-dir "~/Documents/emacs/screenshots"))
+         ;; (indir (expand-file-name ~/Documenti/emacs/screenshots))
+         (infile (aj-fetch-latest "~/Documenti/emacs/screenshots"))
+         ;; (infile (get-newest-file-from-dir "~/Documenti/emacs/screenshots"))
          (outdir (concat (buffer-file-name) "_media"))
          (outfile (expand-file-name (file-name-nondirectory infile) outdir)))
     (unless (file-directory-p outdir)
@@ -585,9 +596,9 @@ Hours wasted for this thing: 10.
   "Moves image from screenshot folder to `buffer-file-name'_media, inserting org-mode link"
   (interactive)
   (let* (
-         ;; (indir (expand-file-name ~/Documents/emacs/screenshots))
-         (infile (aj-fetch-latest "~/Documents/emacs/screenshots"))
-         ;; (infile (get-newest-file-from-dir "~/Documents/emacs/screenshots"))
+         ;; (indir (expand-file-name ~/Documenti/emacs/screenshots))
+         (infile (aj-fetch-latest "~/Documenti/emacs/screenshots"))
+         ;; (infile (get-newest-file-from-dir "~/Documenti/emacs/screenshots"))
          (outdir (concat (buffer-file-name) "_media"))
          (outfile (expand-file-name (file-name-nondirectory infile) outdir)))
     (unless (file-directory-p outdir)
@@ -747,13 +758,13 @@ portion
 #+begin_src emacs-lisp
 (after! org
   (setq org-capture-templates
-        '(("t" "Todo" plain (file+headline "~/Documents/emacs/org/capture/task.org" "TODO")
+        '(("t" "Todo" plain (file+headline "~/Documenti/emacs/org/capture/task.org" "TODO")
            "- [ ] %?"
            :unnarrowed nil)
-          ("j" "Journal" entry (file+datetree "~/Documents/emacs/org/capture/journal.org")
+          ("j" "Journal" entry (file+datetree "~/Documenti/emacs/org/capture/journal.org")
            "* %?\nEntered on %U\n  %i\n  %a\n\n"
            :unnarrowed nil)
-          ("n" "Nota" plain (file "~/Documents/emacs/org/capture/note.org" )
+          ("n" "Nota" plain (file "~/Documenti/emacs/org/capture/note.org" )
            "* %?\n  %i\n  %a\n\n"
            :unnarrowed nil))))
 
@@ -773,7 +784,7 @@ portion
 **** Config
 
 #+begin_src emacs-lisp
-(setq org-roam-directory "~/Documents/emacs/org/roam")
+(setq org-roam-directory "~/Documenti/emacs/org/roam")
 
 (setq org-roam-capture-templates
       '(("d" "default"
@@ -1043,6 +1054,22 @@ done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
 #+end_src
 :end:
 
+*** Convert epub files to html
+
+#+begin_src emacs-lisp
+(defun robert/dwim-shell-command-from-epub-to-html ()
+  "Convert epub books to html"
+  (interactive)
+  (let ((filename (file-name-base (dired-get-filename))))
+    (dwim-shell-command-on-marked-files
+     "Pandoc convert from epub to html"
+     (format "pandoc -f epub -t html -o '<<fne>>.html' '<<f>>' --standalone --self-contained"
+             filename)))
+  :utils '("pandoc")
+  :extensions "html" "epub"
+  :silent-success)
+#+end_src
+
 ** Keyboard
 *** Dired hide hidden files
 
@@ -1070,7 +1097,7 @@ From [[https://qerub.se/hiding-hidden-files-in-emacs-dired][here]] and [[https:/
 #+begin_src emacs-lisp
 (use-package! scihub
  :init
- (setq scihub-download-directory "~/Documents/papers/"
+ (setq scihub-download-directory "~/Documenti/papers/"
        scihub-open-after-download t
        scihub-fetch-domain 'scihub-fetch-domains-lovescihub))
 #+end_src
@@ -1096,20 +1123,20 @@ Open in Zathura pdf reader current pdf in buffer.
 * Nov.el
 ** Variables
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (setq nov-text-width 90)
 #+end_src
 
 ** Functions
 *** Config
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
 #+end_src
 
 *** Font style
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (defun robert/nov-font-setup ()
   (face-remap-add-relative 'variable-pitch :family "IBM Plex Serif"
                                            :height 1.4))
@@ -1121,7 +1148,7 @@ Open in Zathura pdf reader current pdf in buffer.
 
 Less distracting cursor
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (add-hook 'writeroom-mode-enable-hook #'(lambda () 
                                           (setq-local evil-normal-state-cursor 'hbar)
                                           (hl-line-mode -1)))
@@ -1136,7 +1163,7 @@ Less distracting cursor
 ** Keyboard
 *** Remove some keybindings
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (after! nov
   (define-key nov-mode-map (kbd "SPC") nil)
   (define-key nov-mode-map (kbd "S-SPC") nil)

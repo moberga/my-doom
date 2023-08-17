@@ -19,17 +19,17 @@
 ;;
 ;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
 ;; font string. You generally only need these two:
-(setq doom-font (font-spec :family "Blex Mono Nerd Font" :size 17) ;; :weight 'regular)
+(setq doom-font (font-spec :family "IBM Plex Mono" :size 17) ;; :weight 'regular)
       doom-variable-pitch-font (font-spec :family "IBM Plex Sans" :size 19 :weight 'light))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-gruvbox)
+(setq doom-theme 'doom-laserwave)
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
-(setq org-directory "~/Documents/emacs/org/")
+(setq org-directory "~/Documenti/emacs/org/")
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -197,48 +197,8 @@
             ("\\paragraph{%s}" . "\\paragraph*{%s}")
             ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
 
-(setq citar-bibliography '("/home/rob/Documents/.MyLibrary.bib"))
-(setq org-cite-global-bibliography '("/home/rob/Documents/.MyLibrary.bib"))
-
-(defun occur-mode-clean-buffer ()
-  "Removes all commentary from the *Occur* buffer, leaving the
- unadorned lines."
-  (interactive)
-  (if (get-buffer "*Occur*")
-      (save-excursion
-        (set-buffer (get-buffer "*Occur*"))
-        (goto-char (point-min))
-        (read-only-mode 0)
-        ;; (if (looking-at "^[0-9]+ lines matching \"")
-        ;;     (kill-line 1))
-        ;; (flush-lines "^[0-9]+ matches for")
-        (while (re-search-forward "^[ \t]*[0-9]+:"
-                                  (point-max)
-                                  t)
-          (replace-match "")
-          (forward-line 1))
-        (+evil/window-move-left) 
-        (evil-window-increase-width 28)
-        ;; (+popup-mode)
-        (hide-mode-line-mode)
-        (+word-wrap-mode)
-        (text-scale-adjust -1)
-        ;; (rename-buffer (concat "*" buff-name "-Occur*"))
-        (occur-rename-buffer nil t)
-        (read-only-mode 1))
-    (message "There is no buffer named \"*Occur*\".")))
-;; (add-hook 'occur-hook #'occur-mode-clean-buffer)
-
-(defun robert/occur-tree-org ()
-  "Show headings of org file"
-  (interactive)
-  (occur "^\*+ ")
-  (occur-mode-clean-buffer))
-
-(map! :after org
-      :map org-mode-map
-      :localleader
-      :desc "Show Org tree" ";" #'robert/occur-tree-org)
+(setq citar-bibliography '("/home/rob/Documenti/.MyLibrary.bib"))
+(setq org-cite-global-bibliography '("/home/rob/Documenti/.MyLibrary.bib"))
 
 (defun aj-fetch-latest (path)
   (let ((e (f-entries path)))
@@ -251,9 +211,9 @@
   "Moves image from screenshot folder to `buffer-file-name'_media, inserting org-mode link"
   (interactive)
   (let* (
-         ;; (indir (expand-file-name ~/Documents/emacs/screenshots))
-         (infile (aj-fetch-latest "~/Documents/emacs/screenshots"))
-         ;; (infile (get-newest-file-from-dir "~/Documents/emacs/screenshots"))
+         ;; (indir (expand-file-name ~/Documenti/emacs/screenshots))
+         (infile (aj-fetch-latest "~/Documenti/emacs/screenshots"))
+         ;; (infile (get-newest-file-from-dir "~/Documenti/emacs/screenshots"))
          (outdir (concat (buffer-file-name) "_media"))
          (outfile (expand-file-name (file-name-nondirectory infile) outdir)))
     (unless (file-directory-p outdir)
@@ -276,9 +236,9 @@
   "Moves image from screenshot folder to `buffer-file-name'_media, inserting org-mode link"
   (interactive)
   (let* (
-         ;; (indir (expand-file-name ~/Documents/emacs/screenshots))
-         (infile (aj-fetch-latest "~/Documents/emacs/screenshots"))
-         ;; (infile (get-newest-file-from-dir "~/Documents/emacs/screenshots"))
+         ;; (indir (expand-file-name ~/Documenti/emacs/screenshots))
+         (infile (aj-fetch-latest "~/Documenti/emacs/screenshots"))
+         ;; (infile (get-newest-file-from-dir "~/Documenti/emacs/screenshots"))
          (outdir (concat (buffer-file-name) "_media"))
          (outfile (expand-file-name (file-name-nondirectory infile) outdir)))
     (unless (file-directory-p outdir)
@@ -369,13 +329,13 @@
 
 (after! org
   (setq org-capture-templates
-        '(("t" "Todo" plain (file+headline "~/Documents/emacs/org/capture/task.org" "TODO")
+        '(("t" "Todo" plain (file+headline "~/Documenti/emacs/org/capture/task.org" "TODO")
            "- [ ] %?"
            :unnarrowed nil)
-          ("j" "Journal" entry (file+datetree "~/Documents/emacs/org/capture/journal.org")
+          ("j" "Journal" entry (file+datetree "~/Documenti/emacs/org/capture/journal.org")
            "* %?\nEntered on %U\n  %i\n  %a\n\n"
            :unnarrowed nil)
-          ("n" "Nota" plain (file "~/Documents/emacs/org/capture/note.org" )
+          ("n" "Nota" plain (file "~/Documenti/emacs/org/capture/note.org" )
            "* %?\n  %i\n  %a\n\n"
            :unnarrowed nil))))
 
@@ -384,7 +344,7 @@
       org-journal-date-format "%A, %Y_%m_%d"
       org-journal-file-format "%Y_%m_%d.org")
 
-(setq org-roam-directory "~/Documents/emacs/org/roam")
+(setq org-roam-directory "~/Documenti/emacs/org/roam")
 
 (setq org-roam-capture-templates
       '(("d" "default"
@@ -515,6 +475,18 @@ done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
   :extensions "pdf"
   :silent-success)
 
+(defun robert/dwim-shell-command-from-epub-to-html ()
+  "Convert epub books to html"
+  (interactive)
+  (let ((filename (file-name-base (dired-get-filename))))
+    (dwim-shell-command-on-marked-files
+     "Pandoc convert from epub to html"
+     (format "pandoc -f epub -t html -o '<<fne>>.html' '<<f>>' --standalone --self-contained"
+             filename)))
+  :utils '("pandoc")
+  :extensions "html" "epub"
+  :silent-success)
+
 (setq dired-omit-files "^\\...+$")
 
 (eval-after-load 'dired
@@ -527,7 +499,7 @@ done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
 
 (use-package! scihub
  :init
- (setq scihub-download-directory "~/Documents/papers/"
+ (setq scihub-download-directory "~/Documenti/papers/"
        scihub-open-after-download t
        scihub-fetch-domain 'scihub-fetch-domains-lovescihub))
 
@@ -543,38 +515,3 @@ done) | ps2pdf - | pdftk '<<f>>' multistamp - output '<<fne>>_numbered.pdf'
       :map pdf-view-mode-map
       :localleader
       :desc "Open pdf in zathura" "m" #'robert/open-pdf-zathura)
-
-(setq nov-text-width 90)
-
-(add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
-
-(defun robert/nov-font-setup ()
-  (face-remap-add-relative 'variable-pitch :family "IBM Plex Serif"
-                                           :height 1.4))
-
-(add-hook 'nov-mode-hook 'robert/nov-font-setup)
-
-(add-hook 'writeroom-mode-enable-hook #'(lambda () 
-                                          (setq-local evil-normal-state-cursor 'hbar)
-                                          (hl-line-mode -1)))
-;; (add-hook 'writeroom-mode-enable-hook #'(lambda () (hl-line-mode -1)))
-
-(add-hook 'writeroom-mode-disable-hook #'(lambda () 
-                                           (setq-local evil-normal-state-cursor 'box)
-                                           (hl-line-mode)))
-;; (add-hook 'writeroom-mode-disable-hook #'(lambda () (hl-line-mode)))
-
-(after! nov
-  (define-key nov-mode-map (kbd "SPC") nil)
-  (define-key nov-mode-map (kbd "S-SPC") nil)
-  (define-key nov-mode-map (kbd "l") nil)
-  (define-key nov-mode-map (kbd "r") nil)
-  (define-key nov-button-map (kbd "SPC") nil)
-  (define-key nov-button-map (kbd "S-SPC") nil)
-  (define-key nov-button-map (kbd "l") nil)
-  (define-key nov-button-map (kbd "r") nil)
-)
-
-(with-eval-after-load 'nov
-  (evil-define-key 'normal nov-mode-map (kbd "S-SPC") nil)
-  (evil-define-key 'normal nov-mode-map (kbd "DEL") nil))

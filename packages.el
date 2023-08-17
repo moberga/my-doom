@@ -56,7 +56,7 @@
 
 (package! company-box)
 
-(package! nov)
+;; (package! nov)
 
 (package! dwim-shell-command)
 
